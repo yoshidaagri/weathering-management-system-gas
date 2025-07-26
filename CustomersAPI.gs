@@ -11,9 +11,35 @@
  */
 
 /**
- * 顧客管理API メインオブジェクト
+ * 顧客管理API メインオブジェクト（強化版）
  */
 const CustomersAPI = {
+  
+  // キャッシュ設定
+  cache: {
+    customers: null,
+    lastUpdated: null,
+    ttl: 5 * 60 * 1000 // 5分間キャッシュ
+  },
+  
+  /**
+   * キャッシュをクリアする
+   */
+  clearCache: function() {
+    this.cache.customers = null;
+    this.cache.lastUpdated = null;
+    console.log('CustomersAPI cache cleared');
+  },
+  
+  /**
+   * キャッシュが有効かチェック
+   */
+  isCacheValid: function() {
+    if (!this.cache.customers || !this.cache.lastUpdated) {
+      return false;
+    }
+    return (new Date() - this.cache.lastUpdated) < this.cache.ttl;
+  },
   
   /**
    * 新しい顧客を作成する
@@ -152,22 +178,41 @@ const CustomersAPI = {
   },
   
   /**
-   * 全顧客一覧を取得する
+   * 全顧客一覧を取得する（キャッシュ対応・強化版）
    * @param {Object} options フィルタ・ソートオプション
    * @param {string} options.status 契約状況フィルタ
    * @param {string} options.industry 業界フィルタ
    * @param {string} options.sortBy ソート項目
    * @param {string} options.sortOrder ソート順序
    * @param {number} options.limit 取得件数制限
+   * @param {boolean} options.includeInactive 非アクティブ顧客も含める
+   * @param {boolean} options.forceRefresh キャッシュを無視して再取得
    * @returns {Object} 顧客一覧
    */
   getAllCustomers: function(options = {}) {
     const startTime = new Date();
     
     try {
-      // 全データ取得
-      const rawData = DataLib.getAllData('CUSTOMERS_SHEET_ID', 'Customers');
-      let customers = rawData.map(row => this.formatCustomerData(row));
+      let customers;
+      
+      // キャッシュチェック（forceRefreshが指定されていない場合）
+      if (!options.forceRefresh && this.isCacheValid()) {
+        console.log('Using cached customer data');
+        customers = this.cache.customers;
+      } else {
+        console.log('Fetching fresh customer data');
+        
+        // 全データ取得
+        const rawData = DataLib.getAllData('CUSTOMERS_SHEET_ID', 'Customers');
+        customers = rawData.map(row => this.formatCustomerData(row));
+        
+        // キャッシュ更新
+        this.cache.customers = customers;
+        this.cache.lastUpdated = new Date();
+      }
+      
+      // 元のデータをコピーしてフィルタリング（キャッシュデータを変更しないため）
+      let filteredCustomers = [...customers];
       
       // アクティブな顧客のみ取得（デフォルト）
       if (options.includeInactive !== true) {
@@ -423,50 +468,93 @@ const CustomersAPI = {
   },
   
   /**
-   * 顧客データをバリデーションする
+   * 顧客データをバリデーションする（強化版）
    * @param {Object} customerData 顧客データ
    * @returns {Object} バリデーション結果
    */
   validateCustomerData: function(customerData) {
     const errors = [];
+    const warnings = [];
     
-    // 必須項目チェック
+    // 入力データの基本チェック
+    if (!customerData || typeof customerData !== 'object') {
+      errors.push('顧客データが正しく提供されていません');
+      return { isValid: false, errors: errors, warnings: warnings };
+    }
+    
+    // 必須項目チェック（強化）
     if (!customerData.companyName || customerData.companyName.trim() === '') {
       errors.push('会社名は必須です');
+    } else if (customerData.companyName.length > 100) {
+      errors.push('会社名は100文字以内で入力してください');
+    }
+    
+    if (!customerData.contactName || customerData.contactName.trim() === '') {
+      errors.push('担当者名は必須です');
+    } else if (customerData.contactName.length > 50) {
+      errors.push('担当者名は50文字以内で入力してください');
     }
     
     if (!customerData.email || customerData.email.trim() === '') {
       errors.push('メールアドレスは必須です');
-    }
-    
-    // メールアドレス形式チェック
-    if (customerData.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    } else {
+      // メールアドレス形式チェック（強化）
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(customerData.email)) {
         errors.push('メールアドレスの形式が正しくありません');
+      } else if (customerData.email.length > 100) {
+        errors.push('メールアドレスは100文字以内で入力してください');
       }
     }
     
-    // 電話番号形式チェック（入力がある場合）
+    // オプション項目の検証
     if (customerData.phone && customerData.phone.trim() !== '') {
+      // 電話番号形式チェック（日本の電話番号）
       const phoneRegex = /^[\d\-\(\)\+\s]+$/;
       if (!phoneRegex.test(customerData.phone)) {
-        errors.push('電話番号の形式が正しくありません');
+        warnings.push('電話番号に無効な文字が含まれています');
+      } else if (customerData.phone.length > 20) {
+        errors.push('電話番号は20文字以内で入力してください');
       }
     }
     
-    // 文字数制限チェック
-    if (customerData.companyName && customerData.companyName.length > 100) {
-      errors.push('会社名は100文字以内で入力してください');
+    if (customerData.address && customerData.address.length > 200) {
+      errors.push('住所は200文字以内で入力してください');
     }
     
-    if (customerData.contactName && customerData.contactName.length > 50) {
-      errors.push('担当者名は50文字以内で入力してください');
+    if (customerData.industry && customerData.industry.length > 50) {
+      errors.push('業界は50文字以内で入力してください');
     }
+    
+    // 契約状況チェック
+    const validStatuses = ['Active', 'Inactive', 'Pending', 'Suspended', 'Trial'];
+    if (customerData.contractStatus && !validStatuses.includes(customerData.contractStatus)) {
+      errors.push(`契約状況は次のいずれかである必要があります: ${validStatuses.join(', ')}`);
+    }
+    
+    // セキュリティチェック
+    const suspiciousPatterns = [/<script/i, /javascript:/i, /on\w+\s*=/i];
+    const fieldsToCheck = ['companyName', 'contactName', 'email', 'address', 'notes'];
+    
+    fieldsToCheck.forEach(field => {
+      if (customerData[field]) {
+        suspiciousPatterns.forEach(pattern => {
+          if (pattern.test(customerData[field])) {
+            errors.push(`${field}に不正な文字列が含まれています`);
+          }
+        });
+      }
+    });
     
     return {
       isValid: errors.length === 0,
-      errors: errors
+      errors: errors,
+      warnings: warnings,
+      validationDetails: {
+        checkedFields: Object.keys(customerData).length,
+        errorCount: errors.length,
+        warningCount: warnings.length
+      }
     };
   },
   
@@ -734,6 +822,159 @@ const CustomersAPI = {
       
     } catch (logError) {
       console.error('Failed to log error:', logError);
+    }
+  },
+  
+  /**
+   * 高度な顧客検索機能
+   * @param {Object} searchParams 検索パラメータ
+   * @returns {Object} 検索結果
+   */
+  advancedSearch: function(searchParams) {
+    const startTime = new Date();
+    
+    try {
+      const allCustomers = this.getAllCustomers({ includeInactive: true });
+      
+      if (!allCustomers.success) {
+        throw new Error('顧客データの取得に失敗しました');
+      }
+      
+      let results = allCustomers.data;
+      
+      // テキスト検索
+      if (searchParams.query && searchParams.query.trim() !== '') {
+        const query = searchParams.query.toLowerCase().trim();
+        results = results.filter(customer => {
+          return (
+            customer.companyName.toLowerCase().includes(query) ||
+            customer.contactName.toLowerCase().includes(query) ||
+            customer.email.toLowerCase().includes(query) ||
+            (customer.industry && customer.industry.toLowerCase().includes(query)) ||
+            (customer.address && customer.address.toLowerCase().includes(query))
+          );
+        });
+      }
+      
+      // 日付範囲検索
+      if (searchParams.dateFrom || searchParams.dateTo) {
+        results = results.filter(customer => {
+          const createdDate = new Date(customer.createdAt);
+          
+          if (searchParams.dateFrom) {
+            const fromDate = new Date(searchParams.dateFrom);
+            if (createdDate < fromDate) return false;
+          }
+          
+          if (searchParams.dateTo) {
+            const toDate = new Date(searchParams.dateTo);
+            if (createdDate > toDate) return false;
+          }
+          
+          return true;
+        });
+      }
+      
+      // ページネーション
+      let paginatedResults = results;
+      let totalPages = 1;
+      
+      if (searchParams.page && searchParams.pageSize) {
+        const startIndex = (searchParams.page - 1) * searchParams.pageSize;
+        const endIndex = startIndex + searchParams.pageSize;
+        paginatedResults = results.slice(startIndex, endIndex);
+        totalPages = Math.ceil(results.length / searchParams.pageSize);
+      }
+      
+      const executionTime = new Date() - startTime;
+      
+      return {
+        success: true,
+        message: '検索が完了しました',
+        data: {
+          customers: paginatedResults,
+          pagination: {
+            currentPage: searchParams.page || 1,
+            pageSize: searchParams.pageSize || results.length,
+            totalResults: results.length,
+            totalPages: totalPages
+          }
+        },
+        executionTime: executionTime
+      };
+      
+    } catch (error) {
+      this.logError('advancedSearch', error, searchParams);
+      throw error;
+    }
+  },
+  
+  /**
+   * 顧客分析レポート生成
+   * @returns {Object} 分析結果
+   */
+  generateAnalyticsReport: function() {
+    const startTime = new Date();
+    
+    try {
+      const allCustomers = this.getAllCustomers({ includeInactive: true });
+      
+      if (!allCustomers.success) {
+        throw new Error('顧客データの取得に失敗しました');
+      }
+      
+      const customers = allCustomers.data;
+      const report = {
+        overview: {
+          totalCustomers: customers.length,
+          activeCustomers: customers.filter(c => c.isActive).length,
+          inactiveCustomers: customers.filter(c => !c.isActive).length
+        },
+        contractAnalysis: {},
+        industryAnalysis: {},
+        growthAnalysis: {}
+      };
+      
+      // 契約状況分析
+      const contractGroups = customers.reduce((acc, customer) => {
+        const status = customer.contractStatus || 'Unknown';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {});
+      report.contractAnalysis = contractGroups;
+      
+      // 業界分析
+      const industryGroups = customers.reduce((acc, customer) => {
+        const industry = customer.industry || '未分類';
+        acc[industry] = (acc[industry] || 0) + 1;
+        return acc;
+      }, {});
+      report.industryAnalysis = industryGroups;
+      
+      // 成長分析（月別顧客登録数）
+      const monthlyGrowth = {};
+      customers.forEach(customer => {
+        if (customer.createdAt) {
+          const date = new Date(customer.createdAt);
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          monthlyGrowth[monthKey] = (monthlyGrowth[monthKey] || 0) + 1;
+        }
+      });
+      report.growthAnalysis = monthlyGrowth;
+      
+      const executionTime = new Date() - startTime;
+      
+      return {
+        success: true,
+        message: '分析レポートを生成しました',
+        data: report,
+        generatedAt: new Date(),
+        executionTime: executionTime
+      };
+      
+    } catch (error) {
+      this.logError('generateAnalyticsReport', error, {});
+      throw error;
     }
   }
 };

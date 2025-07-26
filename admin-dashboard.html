@@ -377,6 +377,170 @@
                 </div>
             </div>
             
+            <!-- プロジェクト管理セクション -->
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="quick-actions">
+                        <h3 class="section-title">
+                            <i class="fas fa-project-diagram"></i> プロジェクト管理
+                        </h3>
+                        
+                        <!-- プロジェクト登録フォーム -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-plus-circle"></i> 新規プロジェクト登録
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="projectForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="projectName">プロジェクト名 <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="projectName" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="customerId">顧客 <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="customerId" required>
+                                                    <option value="">顧客を選択してください</option>
+                                                </select>
+                                                <small class="form-text text-muted">
+                                                    <a href="#" onclick="showNewCustomerForm()">新規顧客を登録</a>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="projectDescription">プロジェクト概要</label>
+                                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="projectStatus">ステータス</label>
+                                                <select class="form-control" id="projectStatus">
+                                                    <option value="Planning">計画中</option>
+                                                    <option value="InProgress">進行中</option>
+                                                    <option value="Testing">テスト中</option>
+                                                    <option value="Completed">完了</option>
+                                                    <option value="OnHold">保留</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="startDate">開始日</label>
+                                                <input type="date" class="form-control" id="startDate">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="endDate">終了予定日</label>
+                                                <input type="date" class="form-control" id="endDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> プロジェクト登録
+                                        </button>
+                                        <button type="button" class="btn btn-secondary ml-2" onclick="resetProjectForm()">
+                                            <i class="fas fa-undo"></i> リセット
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <!-- 登録成功・エラーメッセージ -->
+                                <div id="projectMessage" style="display: none;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 新規顧客登録モーダル -->
+                        <div id="newCustomerModal" style="display: none;">
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">新規顧客登録</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="customerForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="companyName">会社名 <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="companyName" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="contactName">担当者名 <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="contactName" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="customerEmail">メールアドレス</label>
+                                                    <input type="email" class="form-control" id="customerEmail">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="customerPhone">電話番号</label>
+                                                    <input type="tel" class="form-control" id="customerPhone">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customerAddress">住所</label>
+                                            <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-user-plus"></i> 顧客登録
+                                            </button>
+                                            <button type="button" class="btn btn-secondary ml-2" onclick="hideNewCustomerForm()">
+                                                キャンセル
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最近のプロジェクト -->
+                <div class="col-md-4">
+                    <div class="recent-activity">
+                        <h3 class="section-title">
+                            <i class="fas fa-history"></i> 最近のプロジェクト
+                        </h3>
+                        
+                        <div id="recentProjects">
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">読み込み中...</span>
+                                </div>
+                                <p class="mt-2">プロジェクト情報を読み込み中...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshProjects()">
+                                <i class="fas fa-sync"></i> 更新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- 開発・テスト用セクション -->
             <div class="row mt-4">
                 <div class="col-12">
@@ -428,6 +592,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin dashboard loaded');
+            initializeProjectManagement();
         });
         
         // ログアウト
@@ -450,6 +615,229 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadMeasurementStats();
         });
+        
+        // プロジェクト管理機能の初期化
+        function initializeProjectManagement() {
+            loadCustomersForProject();
+            loadRecentProjects();
+            setupProjectFormHandlers();
+        }
+        
+        // 顧客リストをロード
+        function loadCustomersForProject() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        const customerSelect = document.getElementById('customerId');
+                        customerSelect.innerHTML = '<option value="">顧客を選択してください</option>';
+                        
+                        result.data.forEach(customer => {
+                            const option = document.createElement('option');
+                            option.value = customer.customerId;
+                            option.textContent = `${customer.companyName} (${customer.contactName})`;
+                            customerSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('顧客リスト取得エラー:', result.error);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('顧客リスト取得失敗:', error);
+                })
+                .getCustomersForProject();
+        }
+        
+        // 最近のプロジェクトをロード
+        function loadRecentProjects() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    const projectsDiv = document.getElementById('recentProjects');
+                    
+                    if (result.success) {
+                        if (result.data.length === 0) {
+                            projectsDiv.innerHTML = '<p class="text-muted text-center">まだプロジェクトがありません</p>';
+                        } else {
+                            let html = '';
+                            
+                            result.data.slice(0, 5).forEach(project => {
+                                const statusClass = getStatusClass(project.status);
+                                const statusText = getStatusText(project.status);
+                                
+                                html += `
+                                    <div class="activity-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="activity-icon ${statusClass}">
+                                                <i class="fas fa-project-diagram"></i>
+                                            </div>
+                                            <div class="activity-text">
+                                                <div class="activity-title">${project.projectName}</div>
+                                                <div class="activity-time">
+                                                    ${statusText} - ${new Date(project.createdAt).toLocaleDateString('ja-JP')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            projectsDiv.innerHTML = html;
+                        }
+                    } else {
+                        projectsDiv.innerHTML = '<p class="text-danger">プロジェクト読み込みエラー</p>';
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    document.getElementById('recentProjects').innerHTML = '<p class="text-danger">読み込み失敗</p>';
+                })
+                .getProjectsList();
+        }
+        
+        // フォームハンドラーの設定
+        function setupProjectFormHandlers() {
+            // プロジェクト登録フォーム
+            document.getElementById('projectForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitProject();
+            });
+            
+            // 顧客登録フォーム
+            document.getElementById('customerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitCustomer();
+            });
+        }
+        
+        // プロジェクト登録処理
+        function submitProject() {
+            const formData = {
+                projectName: document.getElementById('projectName').value.trim(),
+                customerId: document.getElementById('customerId').value,
+                description: document.getElementById('projectDescription').value.trim(),
+                status: document.getElementById('projectStatus').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
+            
+            if (!formData.projectName || !formData.customerId) {
+                showProjectMessage('プロジェクト名と顧客は必須です。', 'danger');
+                return;
+            }
+            
+            showProjectMessage('プロジェクトを登録中...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        showProjectMessage('プロジェクトが正常に登録されました！', 'success');
+                        resetProjectForm();
+                        refreshProjects();
+                        updateStats(); // 統計を更新
+                    } else {
+                        showProjectMessage('登録エラー: ' + result.error, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showProjectMessage('登録処理でエラーが発生しました: ' + error.message, 'danger');
+                })
+                .registerProject(formData);
+        }
+        
+        // 顧客登録処理
+        function submitCustomer() {
+            const customerData = {
+                companyName: document.getElementById('companyName').value.trim(),
+                contactName: document.getElementById('contactName').value.trim(),
+                email: document.getElementById('customerEmail').value.trim(),
+                phone: document.getElementById('customerPhone').value.trim(),
+                address: document.getElementById('customerAddress').value.trim()
+            };
+            
+            if (!customerData.companyName || !customerData.contactName) {
+                alert('会社名と担当者名は必須です。');
+                return;
+            }
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        alert('顧客が正常に登録されました！');
+                        hideNewCustomerForm();
+                        loadCustomersForProject(); // 顧客リストを再読み込み
+                        
+                        // 新規登録した顧客を自動選択
+                        document.getElementById('customerId').value = result.data.customerId;
+                    } else {
+                        alert('顧客登録エラー: ' + result.error);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    alert('顧客登録でエラーが発生しました: ' + error.message);
+                })
+                .registerCustomer(customerData);
+        }
+        
+        // プロジェクトフォームリセット
+        function resetProjectForm() {
+            document.getElementById('projectForm').reset();
+            hideProjectMessage();
+        }
+        
+        // 新規顧客フォーム表示
+        function showNewCustomerForm() {
+            document.getElementById('newCustomerModal').style.display = 'block';
+        }
+        
+        // 新規顧客フォーム非表示
+        function hideNewCustomerForm() {
+            document.getElementById('newCustomerModal').style.display = 'none';
+            document.getElementById('customerForm').reset();
+        }
+        
+        // プロジェクト一覧更新
+        function refreshProjects() {
+            loadRecentProjects();
+        }
+        
+        // メッセージ表示
+        function showProjectMessage(message, type) {
+            const messageDiv = document.getElementById('projectMessage');
+            messageDiv.className = `alert alert-${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideProjectMessage();
+                }, 5000);
+            }
+        }
+        
+        // メッセージ非表示
+        function hideProjectMessage() {
+            document.getElementById('projectMessage').style.display = 'none';
+        }
+        
+        // ステータスクラス取得
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Completed': return 'success';
+                case 'InProgress': return 'info';
+                case 'OnHold': return 'warning';
+                default: return 'info';
+            }
+        }
+        
+        // ステータステキスト取得
+        function getStatusText(status) {
+            switch (status) {
+                case 'Planning': return '計画中';
+                case 'InProgress': return '進行中';
+                case 'Testing': return 'テスト中';
+                case 'Completed': return '完了';
+                case 'OnHold': return '保留';
+                default: return status;
+            }
+        }
         
         function loadMeasurementStats() {
             google.script.run
@@ -486,12 +874,17 @@
             
             google.script.run
                 .withSuccessHandler(function(result) {
-                    showTestResults(JSON.stringify(result, null, 2));
+                    if (result.success) {
+                        const formattedResult = formatTestResults(result.data);
+                        showTestResults(formattedResult);
+                    } else {
+                        showTestResults('テスト実行エラー: ' + result.error);
+                    }
                 })
                 .withFailureHandler(function(error) {
                     showTestResults('エラー: ' + error.message);
                 })
-                .runPhase1Tests();
+                .runSystemTests();
         }
         
         function runQualityCheck() {
@@ -499,12 +892,17 @@
             
             google.script.run
                 .withSuccessHandler(function(result) {
-                    showTestResults(JSON.stringify(result, null, 2));
+                    if (result.success) {
+                        const formattedResult = formatQualityResults(result.data);
+                        showTestResults(formattedResult);
+                    } else {
+                        showTestResults('品質チェックエラー: ' + result.error);
+                    }
                 })
                 .withFailureHandler(function(error) {
                     showTestResults('エラー: ' + error.message);
                 })
-                .runPhase1QualityCheck();
+                .runQualityCheck();
         }
         
         function viewSystemLogs() {
@@ -535,11 +933,63 @@
             const resultsDiv = document.getElementById('testResults');
             const outputPre = document.getElementById('testOutput');
             
-            outputPre.textContent = content;
+            outputPre.innerHTML = content;
             resultsDiv.style.display = 'block';
             
             // 結果エリアまでスクロール
             resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function formatTestResults(data) {
+            let output = `<strong>システムテスト結果</strong>\n`;
+            output += `実行時刻: ${new Date(data.timestamp).toLocaleString('ja-JP')}\n\n`;
+            output += `<strong>サマリー:</strong>\n`;
+            output += `  合計: ${data.summary.total} テスト\n`;
+            output += `  成功: ${data.summary.passed} テスト\n`;
+            output += `  失敗: ${data.summary.failed} テスト\n`;
+            output += `  警告: ${data.summary.warnings} テスト\n\n`;
+            
+            output += `<strong>詳細結果:</strong>\n`;
+            data.tests.forEach(test => {
+                const statusIcon = test.status === 'PASS' ? '✅' : test.status === 'FAIL' ? '❌' : '⚠️';
+                output += `${statusIcon} ${test.name}: ${test.message}\n`;
+                if (test.details && Array.isArray(test.details)) {
+                    test.details.forEach(detail => {
+                        output += `    - ${detail}\n`;
+                    });
+                }
+            });
+            
+            return output;
+        }
+        
+        function formatQualityResults(data) {
+            let output = `<strong>品質チェック結果</strong>\n`;
+            output += `実行時刻: ${new Date(data.timestamp).toLocaleString('ja-JP')}\n`;
+            output += `総合スコア: ${data.overallScore}/100\n\n`;
+            
+            output += `<strong>詳細チェック:</strong>\n`;
+            data.checks.forEach(check => {
+                const statusIcon = check.status === 'EXCELLENT' ? '🌟' : 
+                                 check.status === 'GOOD' ? '✅' : 
+                                 check.status === 'WARNING' ? '⚠️' : '❌';
+                output += `${statusIcon} ${check.name}: ${check.score}/100 (${check.status})\n`;
+                
+                if (check.details && Array.isArray(check.details)) {
+                    check.details.forEach(detail => {
+                        output += `    ${detail}\n`;
+                    });
+                }
+            });
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                output += `\n<strong>改善推奨:</strong>\n`;
+                data.recommendations.forEach(rec => {
+                    output += `• ${rec}\n`;
+                });
+            }
+            
+            return output;
         }
         
         // 定期的な統計更新（オプション）

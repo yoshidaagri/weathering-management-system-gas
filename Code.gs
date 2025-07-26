@@ -57,10 +57,31 @@ function doGet(e) {
   const actualFileName = pageMapping[page] || 'index';
 
   try {
-    var template = HtmlService.createTemplateFromFile(actualFileName);
-    return template.evaluate()
-      .setTitle('風化促進CO2除去システム - ' + page)
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    // 特別なレンダリング関数が必要なページの処理
+    switch (page) {
+      case 'admin-login':
+        return renderAdminLoginPage();
+      case 'customer-login':
+        return renderCustomerLoginPage();
+      case 'admin-dashboard':
+        return renderAdminDashboard();
+      case 'customer-dashboard':
+        return renderCustomerDashboard();
+      case 'customers':
+        return renderCustomersPage();
+      case 'projects':
+        return renderProjectsPage();
+      case 'measurements':
+        return renderMeasurementsPage();
+      case 'analytics':
+        return renderAnalyticsPage();
+      default:
+        // シンプルなHTMLテンプレート（変数不要）
+        var template = HtmlService.createTemplateFromFile(actualFileName);
+        return template.evaluate()
+          .setTitle('風化促進CO2除去システム - ' + page)
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
   } catch (error) {
     // ページが存在しない場合はindex.htmlにリダイレクト
     console.error('ページの読み込みエラー:', error);
@@ -214,27 +235,41 @@ function renderCustomerLoginPage() {
  */
 function renderAdminDashboard() {
   try {
+    console.log('renderAdminDashboard: Starting...');
+    
     // 認証チェック
     const authResult = AuthLib.authenticateUser();
+    console.log('Auth result:', authResult);
+    
     if (!authResult.authenticated || authResult.role !== 'admin') {
+      console.log('Authentication failed or not admin');
       return createErrorPage('アクセス拒否', '管理者権限が必要です。');
     }
     
+    console.log('Authentication successful, loading dashboard...');
+    
+    // 統計データを取得
+    const stats = getAdminDashboardStats();
+    console.log('Dashboard stats:', stats);
+    
+    // HTMLテンプレートを読み込み
     const html = HtmlService.createTemplateFromFile('admin-dashboard');
     
     // テンプレート変数設定
     html.appName = Config.APP.NAME;
     html.user = authResult.user;
-    html.stats = getAdminDashboardStats();
+    html.stats = stats;
     
     const output = html.evaluate()
       .setTitle(`${Config.APP.NAME} - 管理者ダッシュボード`)
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     
+    console.log('Dashboard rendered successfully');
     return output;
+    
   } catch (error) {
     console.error('renderAdminDashboard error:', error);
-    return createErrorPage('ページ読み込みエラー', '管理者ダッシュボードの読み込みに失敗しました。');
+    return createErrorPage('ページ読み込みエラー', '管理者ダッシュボードの読み込みに失敗しました: ' + error.message);
   }
 }
 
@@ -324,31 +359,73 @@ function renderTestPage() {
 }
 
 /**
- * 認証処理のハンドラー
- * @param {Object} postData POSTデータ
- * @returns {ContentService.TextOutput} JSON応答
+ * 認証処理のハンドラー（google.script.run用）
+ * @param {Object} authData 認証データ（オプション）
+ * @returns {Object} 認証結果
  */
-function handleAuthentication(postData) {
+function handleAuthentication(authData) {
   try {
+    console.log('handleAuthentication called with:', authData);
+    
     const authResult = AuthLib.authenticateUser();
+    console.log('AuthLib result:', authResult);
     
     if (authResult.authenticated) {
       const redirectUrl = authResult.role === 'admin' ? 
         ScriptApp.getService().getUrl() + '?page=admin-dashboard' :
         ScriptApp.getService().getUrl() + '?page=customer-dashboard';
       
-      return createJsonResponse(true, '認証成功', {
-        user: authResult.user,
-        role: authResult.role,
-        redirectUrl: redirectUrl
-      });
+      return {
+        success: true,
+        message: '認証成功',
+        data: {
+          user: authResult.user,
+          role: authResult.role,
+          redirectUrl: redirectUrl
+        }
+      };
     } else {
-      return createJsonResponse(false, authResult.error || '認証に失敗しました');
+      return {
+        success: false,
+        message: authResult.error || '認証に失敗しました',
+        data: null
+      };
     }
     
   } catch (error) {
     console.error('handleAuthentication error:', error);
-    return createJsonResponse(false, '認証処理でエラーが発生しました');
+    return {
+      success: false,
+      message: '認証処理でエラーが発生しました: ' + error.message,
+      data: null
+    };
+  }
+}
+
+/**
+ * 認証テスト用の簡単な関数
+ * @returns {Object} テスト結果
+ */
+function testAuthentication() {
+  try {
+    const currentUser = AuthLib.getCurrentUser();
+    const config = Config.validateConfiguration();
+    
+    return {
+      success: true,
+      message: 'テスト完了',
+      data: {
+        currentUser: currentUser,
+        config: config,
+        timestamp: new Date()
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'テストエラー: ' + error.message,
+      data: null
+    };
   }
 }
 
@@ -410,21 +487,48 @@ function handleSystemTest(postData) {
  */
 function getAdminDashboardStats() {
   try {
-    const customerData = DataLib.getAllData('customers', 'Customers');
-    const projectData = DataLib.getAllData('projects', 'Projects');
+    console.log('getAdminDashboardStats: Starting...');
     
-    return {
-      totalCustomers: customerData.length - 1, // ヘッダー除く
-      totalProjects: projectData.length - 1,
-      systemStatus: 'Normal',
+    let totalCustomers = 0;
+    let totalProjects = 0;
+    let systemStatus = 'Normal';
+    
+    // 顧客データの取得を試行
+    try {
+      const customerData = DataLib.getAllData('customers', 'Customers');
+      totalCustomers = customerData.length > 0 ? customerData.length - 1 : 0;
+      console.log('Customer data loaded:', totalCustomers);
+    } catch (error) {
+      console.warn('Customer data loading failed:', error.message);
+      systemStatus = 'Warning';
+    }
+    
+    // プロジェクトデータの取得を試行
+    try {
+      const projectData = DataLib.getAllData('projects', 'Projects');
+      totalProjects = projectData.length > 0 ? projectData.length - 1 : 0;
+      console.log('Project data loaded:', totalProjects);
+    } catch (error) {
+      console.warn('Project data loading failed:', error.message);
+      systemStatus = 'Warning';
+    }
+    
+    const stats = {
+      totalCustomers: totalCustomers,
+      totalProjects: totalProjects,
+      systemStatus: systemStatus,
       lastUpdated: new Date()
     };
+    
+    console.log('getAdminDashboardStats: Completed', stats);
+    return stats;
+    
   } catch (error) {
-    console.error('getAdminDashboardStats error:', error);
+    console.error('getAdminDashboardStats critical error:', error);
     return {
       totalCustomers: 0,
       totalProjects: 0,
-      systemStatus: 'Error',
+      systemStatus: 'Error: ' + error.message,
       lastUpdated: new Date()
     };
   }

@@ -123,6 +123,10 @@
         
         .auth-buttons {
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
         }
         
         .auth-btn {
@@ -371,21 +375,31 @@
         
         function handleAuthSuccess(result) {
             console.log('Authentication result:', result);
+            console.log('Result details:', JSON.stringify(result, null, 2));
             
             const loading = document.getElementById('loading');
             loading.style.display = 'none';
             
+            // nullチェックを強化
+            if (!result) {
+                console.error('Result is null or undefined');
+                showError('認証結果を取得できませんでした。');
+                resetAuthButton();
+                return;
+            }
+            
             if (result.success && result.data && result.data.role === 'admin') {
-                // 管理者認証成功
-                showSuccessMessage('管理者として認証されました。ダッシュボードに移動します...');
-                
-                setTimeout(() => {
-                    window.location.href = '?page=admin-dashboard';
-                }, 1500);
+                // 管理者認証成功 - ボタン表示に変更
+                console.log('Admin authentication successful');
+                showSuccessMessage('管理者として認証されました！');
+                showDashboardButton(result.data.redirectUrl);
                 
             } else {
                 // 認証失敗
-                showError(result.message || '管理者権限の認証に失敗しました。');
+                const errorMessage = result.message || '管理者権限の認証に失敗しました。';
+                console.error('Authentication failed:', errorMessage);
+                console.error('Result was:', result);
+                showError(errorMessage);
                 resetAuthButton();
             }
         }
@@ -419,6 +433,49 @@
             
             errorText.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
             errorMessage.style.display = 'block';
+        }
+        
+        function showDashboardButton(redirectUrl) {
+            const authButtons = document.querySelector('.auth-buttons');
+            
+            // 既存のボタンを非表示
+            const loginBtn = document.getElementById('adminLoginBtn');
+            if (loginBtn) {
+                loginBtn.style.display = 'none';
+            }
+            
+            // サーバーから返されたredirectUrlを優先使用
+            const dashboardUrl = redirectUrl || (window.location.origin + window.location.pathname + '?page=admin-dashboard');
+            
+            console.log('Current URL:', window.location.href);
+            console.log('Using Dashboard URL:', dashboardUrl);
+            console.log('Redirect URL from server:', redirectUrl);
+            
+            // ダッシュボード遷移ボタンを作成
+            const dashboardBtn = document.createElement('button');
+            dashboardBtn.className = 'auth-btn';
+            dashboardBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            dashboardBtn.innerHTML = '<i class="fas fa-tachometer-alt"></i> 管理者ダッシュボードへ';
+            dashboardBtn.onclick = function() {
+                console.log('Dashboard button clicked, navigating to:', dashboardUrl);
+                window.location.href = dashboardUrl;
+            };
+            
+            // ボタンを追加
+            authButtons.appendChild(dashboardBtn);
+            
+            // 再ログインボタンも追加
+            const reloginBtn = document.createElement('button');
+            reloginBtn.className = 'auth-btn';
+            reloginBtn.style.background = 'linear-gradient(135deg, #6c757d 0%, #5a6268 100%)';
+            reloginBtn.style.fontSize = '0.9rem';
+            reloginBtn.style.minWidth = '140px';
+            reloginBtn.innerHTML = '<i class="fas fa-redo"></i> 再ログイン';
+            reloginBtn.onclick = function() {
+                location.reload();
+            };
+            
+            authButtons.appendChild(reloginBtn);
         }
         
         function resetAuthButton() {
@@ -498,19 +555,17 @@
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             
-            // 認証実行
-            try {
-                const authResult = AuthLib.authenticateUser();
-                clearTimeout(authTimeout);
-                handleAuthSuccess({ 
-                    success: authResult.authenticated && authResult.role === 'admin',
-                    message: authResult.error || 'OK',
-                    data: authResult
-                });
-            } catch (error) {
-                clearTimeout(authTimeout);
-                handleAuthError(error);
-            }
+            // サーバーサイド認証実行（google.script.runを使用）
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    clearTimeout(authTimeout);
+                    handleAuthSuccess(result);
+                })
+                .withFailureHandler(function(error) {
+                    clearTimeout(authTimeout);
+                    handleAuthError(error);
+                })
+                .handleAuthentication({ action: 'authenticate', userType: 'admin' });
         }
     </script>
 </body>
