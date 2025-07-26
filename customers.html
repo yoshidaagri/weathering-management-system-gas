@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 顧客管理</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-text {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .btn-outline-light {
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .main-container {
+            padding: 30px 0;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-title i {
+            margin-right: 15px;
+            color: #f093fb;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .action-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-section {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            margin-right: 20px;
+        }
+        
+        .search-input {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            min-width: 250px;
+        }
+        
+        .filter-select {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .customers-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+            font-weight: 600;
+            padding: 15px 10px;
+        }
+        
+        .table tbody td {
+            border-top: 1px solid #f0f0f0;
+            padding: 15px 10px;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.prospect {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .status-badge.active {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status-badge.inactive {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            border-color: #17a2b8;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .stats-row {
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            height: 100%;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            margin: 0 auto 15px;
+        }
+        
+        .stat-icon.total {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-icon.active {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .stat-icon.recent {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .pagination-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .pagination {
+            margin: 0;
+            justify-content: center;
+        }
+        
+        .page-link {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            margin: 0 2px;
+        }
+        
+        .page-link:hover {
+            background-color: #f093fb;
+            color: white;
+            border-color: #f093fb;
+        }
+        
+        .page-item.active .page-link {
+            background-color: #f093fb;
+            border-color: #f093fb;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 10px 12px;
+        }
+        
+        .form-control:focus {
+            border-color: #f093fb;
+            box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.25);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .alert-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9998;
+            max-width: 400px;
+        }
+        
+        @media (max-width: 768px) {
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-section {
+                margin-right: 0;
+                margin-bottom: 15px;
+                flex-direction: column;
+            }
+            
+            .search-input,
+            .filter-select {
+                min-width: auto;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .table-responsive {
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="?page=admin-dashboard">
+                <i class="fas fa-leaf"></i> <?= appName ?>
+            </a>
+            
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-shield"></i> 管理者: <?= user.name ?>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> ダッシュボード
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-container">
+        <div class="container">
+            <!-- ページヘッダー -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-users"></i> 顧客管理
+                </h1>
+                <p class="page-subtitle">
+                    登録顧客の管理・編集・新規追加を行います
+                </p>
+            </div>
+            
+            <!-- 統計サマリー -->
+            <div class="row stats-row">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-number" id="totalCustomers"><?= stats.total || 0 ?></div>
+                        <p class="stat-label">総顧客数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="stat-number" id="activeCustomers"><?= stats.active || 0 ?></div>
+                        <p class="stat-label">アクティブ顧客</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon recent">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="stat-number" id="recentCustomers"><?= stats.recentlyAdded || 0 ?></div>
+                        <p class="stat-label">新規顧客（7日以内）</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- アクション バー -->
+            <div class="action-bar">
+                <div class="search-section">
+                    <input type="text" class="form-control search-input" id="searchInput" 
+                           placeholder="顧客名・会社名・メールアドレスで検索...">
+                    
+                    <select class="form-control filter-select" id="statusFilter">
+                        <option value="">全ての契約状況</option>
+                        <option value="prospect">見込み客</option>
+                        <option value="active">契約中</option>
+                        <option value="inactive">契約終了</option>
+                    </select>
+                    
+                    <select class="form-control filter-select" id="industryFilter">
+                        <option value="">全ての業界</option>
+                        <option value="manufacturing">製造業</option>
+                        <option value="mining">鉱業</option>
+                        <option value="construction">建設業</option>
+                        <option value="other">その他</option>
+                    </select>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="openCreateModal()">
+                        <i class="fas fa-plus"></i> 新規顧客登録
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="refreshCustomers()">
+                        <i class="fas fa-sync-alt"></i> 更新
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 顧客一覧テーブル -->
+            <div class="customers-table-container">
+                <div class="table-responsive">
+                    <table class="table" id="customersTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('companyName')">
+                                    会社名 <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortTable('contactName')">
+                                    担当者 <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortTable('email')">
+                                    メールアドレス <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortTable('industry')">
+                                    業界 <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortTable('contractStatus')">
+                                    契約状況 <i class="fas fa-sort"></i>
+                                </th>
+                                <th onclick="sortTable('createdAt')">
+                                    登録日 <i class="fas fa-sort"></i>
+                                </th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <!-- データは JavaScript で動的に挿入 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- データなしの場合の表示 -->
+                <div id="noDataMessage" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-users text-muted" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h5 class="text-muted">顧客データが見つかりません</h5>
+                    <p class="text-muted">検索条件を変更するか、新規顧客を登録してください。</p>
+                </div>
+            </div>
+            
+            <!-- ページネーション -->
+            <div class="pagination-container">
+                <nav>
+                    <ul class="pagination" id="pagination">
+                        <!-- ページネーションは JavaScript で動的に生成 -->
+                    </ul>
+                </nav>
+                
+                <div class="mt-3">
+                    <small class="text-muted" id="paginationInfo">
+                        <!-- ページ情報は JavaScript で動的に表示 -->
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 顧客作成・編集モーダル -->
+    <div class="modal fade" id="customerModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">新規顧客登録</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="companyName">会社名 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="companyName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="contactName">担当者名</label>
+                                    <input type="text" class="form-control" id="contactName">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email">メールアドレス <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone">電話番号</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">住所</label>
+                            <input type="text" class="form-control" id="address">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="industry">業界</label>
+                                    <select class="form-control" id="industry">
+                                        <option value="">選択してください</option>
+                                        <option value="manufacturing">製造業</option>
+                                        <option value="mining">鉱業</option>
+                                        <option value="construction">建設業</option>
+                                        <option value="other">その他</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="contractStatus">契約状況</label>
+                                    <select class="form-control" id="contractStatus">
+                                        <option value="prospect">見込み客</option>
+                                        <option value="active">契約中</option>
+                                        <option value="inactive">契約終了</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notes">備考</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+                        
+                        <input type="hidden" id="customerId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomer()">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ローディングオーバーレイ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="mt-3">処理中...</div>
+        </div>
+    </div>
+    
+    <!-- アラート表示エリア -->
+    <div class="alert-container" id="alertContainer"></div>
+    
+    <!-- Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // グローバル変数
+        let allCustomers = [];
+        let filteredCustomers = [];
+        let currentPage = 1;
+        let pageSize = 10;
+        let sortColumn = 'companyName';
+        let sortDirection = 'asc';
+        let isEditMode = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Customers management page loaded');
+            initializePage();
+        });
+        
+        // ページ初期化
+        function initializePage() {
+            setupEventListeners();
+            loadCustomers();
+        }
+        
+        // イベントリスナー設定
+        function setupEventListeners() {
+            // 検索フィルタ
+            document.getElementById('searchInput').addEventListener('input', debounce(filterCustomers, 300));
+            document.getElementById('statusFilter').addEventListener('change', filterCustomers);
+            document.getElementById('industryFilter').addEventListener('change', filterCustomers);
+            
+            // モーダルイベント
+            $('#customerModal').on('hidden.bs.modal', function() {
+                resetForm();
+            });
+        }
+        
+        // 顧客データを読み込む
+        function loadCustomers() {
+            showLoading(true);
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        allCustomers = result.data;
+                        updateStats(result.stats);
+                        filterCustomers();
+                    } else {
+                        showAlert('エラー', result.message, 'error');
+                    }
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    showAlert('エラー', '顧客データの読み込みに失敗しました: ' + error.message, 'error');
+                    showLoading(false);
+                })
+                .loadCustomersData();
+        }
+        
+        // 統計情報を更新
+        function updateStats(stats) {
+            if (stats) {
+                document.getElementById('totalCustomers').textContent = stats.total || 0;
+                document.getElementById('activeCustomers').textContent = stats.active || 0;
+                document.getElementById('recentCustomers').textContent = stats.recentlyAdded || 0;
+            }
+        }
+        
+        // 顧客データをフィルタリング
+        function filterCustomers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const industryFilter = document.getElementById('industryFilter').value;
+            
+            filteredCustomers = allCustomers.filter(customer => {
+                const matchesSearch = !searchTerm || 
+                    customer.companyName.toLowerCase().includes(searchTerm) ||
+                    customer.contactName.toLowerCase().includes(searchTerm) ||
+                    customer.email.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || customer.contractStatus === statusFilter;
+                const matchesIndustry = !industryFilter || customer.industry === industryFilter;
+                
+                return matchesSearch && matchesStatus && matchesIndustry;
+            });
+            
+            currentPage = 1;
+            renderCustomersTable();
+            renderPagination();
+        }
+        
+        // 顧客テーブルをレンダリング
+        function renderCustomersTable() {
+            const tableBody = document.getElementById('customersTableBody');
+            const noDataMessage = document.getElementById('noDataMessage');
+            
+            if (filteredCustomers.length === 0) {
+                tableBody.innerHTML = '';
+                noDataMessage.style.display = 'block';
+                return;
+            }
+            
+            noDataMessage.style.display = 'none';
+            
+            // ソート
+            const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+                let valueA = a[sortColumn];
+                let valueB = b[sortColumn];
+                
+                if (sortColumn === 'createdAt') {
+                    valueA = new Date(valueA);
+                    valueB = new Date(valueB);
+                } else if (typeof valueA === 'string') {
+                    valueA = valueA.toLowerCase();
+                    valueB = valueB.toLowerCase();
+                }
+                
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // ページネーション
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageCustomers = sortedCustomers.slice(startIndex, endIndex);
+            
+            // テーブル行生成
+            const rows = pageCustomers.map(customer => `
+                <tr>
+                    <td>
+                        <strong>${escapeHtml(customer.companyName)}</strong>
+                    </td>
+                    <td>${escapeHtml(customer.contactName)}</td>
+                    <td>
+                        <a href="mailto:${escapeHtml(customer.email)}" class="text-primary">
+                            ${escapeHtml(customer.email)}
+                        </a>
+                    </td>
+                    <td>${getIndustryLabel(customer.industry)}</td>
+                    <td>
+                        <span class="status-badge ${customer.contractStatus}">
+                            ${getStatusLabel(customer.contractStatus)}
+                        </span>
+                    </td>
+                    <td>${formatDate(customer.createdAt)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-info btn-sm" onclick="viewCustomer('${customer.customerId}')" 
+                                    title="詳細表示">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="editCustomer('${customer.customerId}')" 
+                                    title="編集">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${customer.customerId}')" 
+                                    title="削除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            tableBody.innerHTML = rows;
+        }
+        
+        // ページネーションをレンダリング
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+            const pagination = document.getElementById('pagination');
+            const paginationInfo = document.getElementById('paginationInfo');
+            
+            // ページ情報表示
+            const startItem = (currentPage - 1) * pageSize + 1;
+            const endItem = Math.min(currentPage * pageSize, filteredCustomers.length);
+            paginationInfo.textContent = `${startItem}-${endItem} / ${filteredCustomers.length}件`;
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // 前へボタン
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">前へ</a>
+                </li>
+            `;
+            
+            // ページ番号
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // 次へボタン
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">次へ</a>
+                </li>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+        
+        // ページ変更
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderCustomersTable();
+            renderPagination();
+        }
+        
+        // テーブルソート
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            renderCustomersTable();
+            renderPagination();
+        }
+        
+        // 新規顧客作成モーダルを開く
+        function openCreateModal() {
+            isEditMode = false;
+            document.getElementById('modalTitle').textContent = '新規顧客登録';
+            resetForm();
+            $('#customerModal').modal('show');
+        }
+        
+        // 顧客編集モーダルを開く
+        function editCustomer(customerId) {
+            const customer = allCustomers.find(c => c.customerId === customerId);
+            if (!customer) {
+                showAlert('エラー', '顧客が見つかりません', 'error');
+                return;
+            }
+            
+            isEditMode = true;
+            document.getElementById('modalTitle').textContent = '顧客情報編集';
+            
+            // フォームにデータ設定
+            document.getElementById('customerId').value = customer.customerId;
+            document.getElementById('companyName').value = customer.companyName;
+            document.getElementById('contactName').value = customer.contactName;
+            document.getElementById('email').value = customer.email;
+            document.getElementById('phone').value = customer.phone;
+            document.getElementById('address').value = customer.address;
+            document.getElementById('industry').value = customer.industry;
+            document.getElementById('contractStatus').value = customer.contractStatus;
+            document.getElementById('notes').value = customer.notes;
+            
+            $('#customerModal').modal('show');
+        }
+        
+        // 顧客詳細表示
+        function viewCustomer(customerId) {
+            const customer = allCustomers.find(c => c.customerId === customerId);
+            if (!customer) {
+                showAlert('エラー', '顧客が見つかりません', 'error');
+                return;
+            }
+            
+            const detailHTML = `
+                <div class="customer-detail">
+                    <h5>${escapeHtml(customer.companyName)}</h5>
+                    <p><strong>担当者:</strong> ${escapeHtml(customer.contactName)}</p>
+                    <p><strong>メール:</strong> ${escapeHtml(customer.email)}</p>
+                    <p><strong>電話:</strong> ${escapeHtml(customer.phone)}</p>
+                    <p><strong>住所:</strong> ${escapeHtml(customer.address)}</p>
+                    <p><strong>業界:</strong> ${getIndustryLabel(customer.industry)}</p>
+                    <p><strong>契約状況:</strong> ${getStatusLabel(customer.contractStatus)}</p>
+                    <p><strong>登録日:</strong> ${formatDate(customer.createdAt)}</p>
+                    <p><strong>備考:</strong> ${escapeHtml(customer.notes)}</p>
+                </div>
+            `;
+            
+            showAlert('顧客詳細', detailHTML, 'info', false);
+        }
+        
+        // 顧客保存
+        function saveCustomer() {
+            const form = document.getElementById('customerForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const customerData = {
+                companyName: document.getElementById('companyName').value,
+                contactName: document.getElementById('contactName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                industry: document.getElementById('industry').value,
+                contractStatus: document.getElementById('contractStatus').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            showLoading(true);
+            
+            if (isEditMode) {
+                const customerId = document.getElementById('customerId').value;
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        handleSaveResult(result, '顧客情報が更新されました');
+                    })
+                    .withFailureHandler(function(error) {
+                        showAlert('エラー', '顧客情報の更新に失敗しました: ' + error.message, 'error');
+                        showLoading(false);
+                    })
+                    .updateCustomerData(customerId, customerData);
+            } else {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        handleSaveResult(result, '顧客が登録されました');
+                    })
+                    .withFailureHandler(function(error) {
+                        showAlert('エラー', '顧客の登録に失敗しました: ' + error.message, 'error');
+                        showLoading(false);
+                    })
+                    .createCustomerData(customerData);
+            }
+        }
+        
+        // 保存結果処理
+        function handleSaveResult(result, successMessage) {
+            showLoading(false);
+            
+            if (result.success) {
+                showAlert('成功', successMessage, 'success');
+                $('#customerModal').modal('hide');
+                loadCustomers();
+            } else {
+                showAlert('エラー', result.message, 'error');
+            }
+        }
+        
+        // 顧客削除
+        function deleteCustomer(customerId) {
+            const customer = allCustomers.find(c => c.customerId === customerId);
+            if (!customer) {
+                showAlert('エラー', '顧客が見つかりません', 'error');
+                return;
+            }
+            
+            if (!confirm(`顧客「${customer.companyName}」を削除しますか？\n\nこの操作は取り消せません。`)) {
+                return;
+            }
+            
+            showLoading(true);
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    
+                    if (result.success) {
+                        showAlert('成功', '顧客が削除されました', 'success');
+                        loadCustomers();
+                    } else {
+                        showAlert('エラー', result.message, 'error');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showAlert('エラー', '顧客の削除に失敗しました: ' + error.message, 'error');
+                    showLoading(false);
+                })
+                .deleteCustomerData(customerId);
+        }
+        
+        // フォームリセット
+        function resetForm() {
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerId').value = '';
+        }
+        
+        // 顧客データ更新
+        function refreshCustomers() {
+            loadCustomers();
+        }
+        
+        // ダッシュボードに戻る
+        function goBack() {
+            window.location.href = '?page=admin-dashboard';
+        }
+        
+        // ユーティリティ関数
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ja-JP');
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                'prospect': '見込み客',
+                'active': '契約中',
+                'inactive': '契約終了'
+            };
+            return labels[status] || status;
+        }
+        
+        function getIndustryLabel(industry) {
+            const labels = {
+                'manufacturing': '製造業',
+                'mining': '鉱業',
+                'construction': '建設業',
+                'other': 'その他'
+            };
+            return labels[industry] || industry;
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // ローディング表示
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+        
+        // アラート表示
+        function showAlert(title, message, type = 'info', autoClose = true) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert_' + Date.now();
+            
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+            
+            const alertHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" id="${alertId}" role="alert">
+                    <strong>${escapeHtml(title)}</strong><br>
+                    ${typeof message === 'string' ? escapeHtml(message) : message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+            
+            if (autoClose) {
+                setTimeout(() => {
+                    const alertElement = document.getElementById(alertId);
+                    if (alertElement) {
+                        $(alertElement).alert('close');
+                    }
+                }, 5000);
+            }
+        }
+        
+        // エラーハンドリング
+        window.addEventListener('error', function(e) {
+            console.error('Customers page error:', e.error);
+            showAlert('エラー', 'ページでエラーが発生しました', 'error');
+        });
+    </script>
+</body>
+</html>

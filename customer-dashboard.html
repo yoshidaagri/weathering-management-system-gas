@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 顧客ダッシュボード</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-text {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .btn-outline-light {
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .dashboard-container {
+            padding: 30px 0;
+        }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .welcome-title {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .stats-icon.projects {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stats-icon.active {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .stats-icon.updated {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .stats-icon.measurements {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .stats-icon.efficiency {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        
+        .stats-icon.co2 {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+        
+        .stats-icon.quality {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        
+        .project-list {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .project-item {
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .project-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.15);
+        }
+        
+        .project-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .project-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+        
+        .project-status {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .project-status.inactive {
+            background: #6c757d;
+        }
+        
+        .project-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .project-progress {
+            margin-bottom: 10px;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 10px;
+        }
+        
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 15px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+        
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .action-btn i {
+            margin-right: 10px;
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: #4facfe;
+        }
+        
+        .info-card {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-card h6 {
+            color: #1976d2;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-card h6 i {
+            margin-right: 8px;
+        }
+        
+        .info-card p {
+            color: #0d47a1;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-leaf"></i> <?= appName ?>
+            </a>
+            
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-building"></i> <?= user.companyName || user.email ?>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ログアウト
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- メインコンテンツ -->
+    <div class="dashboard-container">
+        <div class="container">
+            <!-- ウェルカムセクション -->
+            <div class="welcome-section">
+                <h1 class="welcome-title">
+                    <i class="fas fa-chart-line"></i> お客様ダッシュボード
+                </h1>
+                <p class="welcome-subtitle">
+                    <?= user.companyName || 'お客様' ?>のプロジェクト進捗と測定データをご確認いただけます
+                </p>
+            </div>
+            
+            <!-- 統計サマリー -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon projects">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stats-number"><?= stats.totalProjects ?></div>
+                        <p class="stats-label">総プロジェクト数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon active">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stats-number"><?= stats.activeProjects ?></div>
+                        <p class="stats-label">進行中プロジェクト</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon updated">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stats-number"><?= new Date(stats.lastUpdated).toLocaleDateString('ja-JP') ?></div>
+                        <p class="stats-label">最終更新日</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Phase 3: 測定データサマリー -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon measurements">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div class="stats-number" id="totalMeasurements">-</div>
+                        <p class="stats-label">測定データ数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon efficiency">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="stats-number" id="avgEfficiency">-%</div>
+                        <p class="stats-label">平均効率</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon co2">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stats-number" id="totalCO2Removed">-</div>
+                        <p class="stats-label">総CO2除去量 (kg)</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon quality">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stats-number" id="avgQuality">-</div>
+                        <p class="stats-label">平均品質スコア</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- メインコンテンツエリア -->
+            <div class="row">
+                <!-- プロジェクト一覧 -->
+                <div class="col-md-8">
+                    <div class="project-list">
+                        <h3 class="section-title">
+                            <i class="fas fa-folder-open"></i> 現在のプロジェクト
+                        </h3>
+                        
+                        <? if (stats.totalProjects > 0) { ?>
+                            <!-- プロジェクトサンプル表示 -->
+                            <div class="project-item">
+                                <div class="project-header">
+                                    <div class="project-name">風化促進CO2除去プロジェクト #001</div>
+                                    <div class="project-status">進行中</div>
+                                </div>
+                                <div class="project-details">
+                                    <i class="fas fa-map-marker-alt"></i> 北海道鉱山サイト | 
+                                    開始日: 2024/01/15 | 
+                                    目標CO2除去量: 1,000 トン/年
+                                </div>
+                                <div class="project-progress">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">進捗率</span>
+                                        <span class="text-muted">65%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button class="btn btn-outline-primary" onclick="viewAllProjects()">
+                                    <i class="fas fa-list"></i> 全プロジェクトを表示
+                                </button>
+                            </div>
+                        <? } else { ?>
+                            <div class="empty-state">
+                                <i class="fas fa-folder-open"></i>
+                                <h5>プロジェクトが見つかりません</h5>
+                                <p>現在進行中のプロジェクトはありません。<br>新しいプロジェクトについては管理者にお問い合わせください。</p>
+                            </div>
+                        <? } ?>
+                    </div>
+                </div>
+                
+                <!-- クイックアクション -->
+                <div class="col-md-4">
+                    <div class="quick-actions">
+                        <h3 class="section-title">
+                            <i class="fas fa-bolt"></i> クイックアクション
+                        </h3>
+                        
+                        <a href="#" class="action-btn" onclick="viewMeasurementData()">
+                            <i class="fas fa-flask"></i> 測定データ確認
+                        </a>
+                        
+                        <a href="#" class="action-btn" onclick="downloadReports()">
+                            <i class="fas fa-file-download"></i> レポートダウンロード
+                        </a>
+                        
+                        <a href="#" class="action-btn" onclick="viewSchedule()">
+                            <i class="fas fa-calendar-alt"></i> スケジュール確認
+                        </a>
+                        
+                        <a href="#" class="action-btn" onclick="contactSupport()">
+                            <i class="fas fa-headset"></i> サポート連絡
+                        </a>
+                    </div>
+                    
+                    <!-- お知らせ・ヘルプ -->
+                    <div class="info-card">
+                        <h6><i class="fas fa-info-circle"></i> ご利用について</h6>
+                        <p>
+                            このダッシュボードでは、お客様のプロジェクトに関するデータのみを表示しています。
+                            他のお客様のデータは表示されませんので、安心してご利用ください。
+                        </p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h6><i class="fas fa-question-circle"></i> ヘルプ</h6>
+                        <p>
+                            システムの使い方やデータの見方について不明な点がございましたら、
+                            サポートまでお気軽にお問い合わせください。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Customer dashboard loaded');
+            loadCustomerMeasurementData();
+        });
+        
+        // 顧客の測定データ統計を読み込み
+        function loadCustomerMeasurementData() {
+            const customerId = '<?= user.customerId ?>';
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        updateMeasurementStats(result.data);
+                    } else {
+                        console.error('測定データ統計読み込みエラー:', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('測定データ統計読み込み失敗:', error);
+                    setDefaultMeasurementStats();
+                })
+                .getCustomerMeasurementStats(customerId);
+        }
+        
+        // 測定データ統計を画面に反映
+        function updateMeasurementStats(data) {
+            document.getElementById('totalMeasurements').textContent = 
+                (data.totalMeasurements || 0).toLocaleString();
+            document.getElementById('avgEfficiency').textContent = 
+                (data.averageEfficiency || 0).toFixed(1) + '%';
+            document.getElementById('totalCO2Removed').textContent = 
+                (data.totalCO2Removed || 0).toLocaleString();
+            document.getElementById('avgQuality').textContent = 
+                (data.averageQuality || 0).toFixed(0);
+        }
+        
+        // デフォルト値を設定
+        function setDefaultMeasurementStats() {
+            document.getElementById('totalMeasurements').textContent = '0';
+            document.getElementById('avgEfficiency').textContent = '0%';
+            document.getElementById('totalCO2Removed').textContent = '0';
+            document.getElementById('avgQuality').textContent = '0';
+        }
+        
+        // ログアウト
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                window.location.href = '?';
+            }
+        }
+        
+        // クイックアクション関数群
+        function viewAllProjects() {
+            // 顧客のプロジェクト一覧を表示
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        displayCustomerProjects(result.data);
+                    } else {
+                        alert('プロジェクトデータの取得に失敗しました: ' + result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    alert('プロジェクトデータの取得中にエラーが発生しました: ' + error.message);
+                })
+                .getCustomerProjects('<?= user.customerId ?>');
+        }
+        
+        function displayCustomerProjects(projects) {
+            let projectsHTML = '<div class="customer-projects">';
+            projectsHTML += '<h4><i class="fas fa-project-diagram"></i> 実施中のプロジェクト</h4>';
+            
+            if (projects.length === 0) {
+                projectsHTML += '<p>現在進行中のプロジェクトはありません。</p>';
+            } else {
+                projects.forEach(project => {
+                    projectsHTML += `
+                        <div class="project-card mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${project.projectName}</h5>
+                                    <p class="card-text">${project.description}</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">場所: ${project.location}</small><br>
+                                            <small class="text-muted">ステータス: ${getProjectStatusLabel(project.status)}</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">進捗率: ${project.progress}%</small><br>
+                                            <small class="text-muted">CO2除去量: ${project.actualCO2Removal}/${project.targetCO2Removal} トン</small>
+                                        </div>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 10px;">
+                                        <div class="progress-bar" style="width: ${project.progress}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            projectsHTML += '</div>';
+            
+            // モーダルで表示
+            const modalHTML = `
+                <div class="modal fade" id="projectsModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                                <h5 class="modal-title">お客様のプロジェクト一覧</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${projectsHTML}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 既存のモーダルを削除
+            const existingModal = document.getElementById('projectsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 新しいモーダルを追加
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            $('#projectsModal').modal('show');
+        }
+        
+        function getProjectStatusLabel(status) {
+            const labels = {
+                'planning': '計画中',
+                'active': '進行中',
+                'on-hold': '一時停止',
+                'completed': '完了',
+                'cancelled': 'キャンセル'
+            };
+            return labels[status] || status;
+        }
+        
+        function viewMeasurementData() {
+            const customerId = '<?= user.customerId ?>';
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        displayMeasurementDataModal(result.data);
+                    } else {
+                        alert('測定データの取得に失敗しました: ' + result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    alert('測定データの取得中にエラーが発生しました: ' + error.message);
+                })
+                .getCustomerMeasurements(customerId);
+        }
+        
+        // 測定データモーダル表示
+        function displayMeasurementDataModal(measurements) {
+            let measurementsHTML = '<div class="measurement-data">';
+            measurementsHTML += '<h4><i class="fas fa-flask"></i> 最新の測定データ</h4>';
+            
+            if (measurements.length === 0) {
+                measurementsHTML += '<p>測定データが見つかりません。</p>';
+            } else {
+                measurementsHTML += '<div class="table-responsive">';
+                measurementsHTML += '<table class="table table-striped">';
+                measurementsHTML += '<thead><tr>';
+                measurementsHTML += '<th>測定日時</th><th>pH値</th><th>CO2濃度</th><th>温度</th><th>効率</th><th>品質</th>';
+                measurementsHTML += '</tr></thead><tbody>';
+                
+                // 最新10件のデータを表示
+                measurements.slice(0, 10).forEach(measurement => {
+                    const qualityBadge = getQualityBadge(measurement.qualityCheck);
+                    measurementsHTML += `
+                        <tr>
+                            <td>${formatDateTime(measurement.measurementDate, measurement.measurementTime)}</td>
+                            <td>${formatValue(measurement.pH, 1)}</td>
+                            <td>${formatValue(measurement.co2Concentration, 1)} ppm</td>
+                            <td>${formatValue(measurement.temperature, 1)}°C</td>
+                            <td>${formatValue(measurement.efficiency, 1)}%</td>
+                            <td>${qualityBadge}</td>
+                        </tr>
+                    `;
+                });
+                
+                measurementsHTML += '</tbody></table></div>';
+                
+                if (measurements.length > 10) {
+                    measurementsHTML += `<p class="text-muted">他 ${measurements.length - 10} 件のデータがあります。</p>`;
+                }
+            }
+            
+            measurementsHTML += '</div>';
+            
+            // モーダルで表示
+            const modalHTML = `
+                <div class="modal fade" id="measurementDataModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                                <h5 class="modal-title">測定データ確認</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${measurementsHTML}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 既存のモーダルを削除
+            const existingModal = document.getElementById('measurementDataModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 新しいモーダルを追加
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            $('#measurementDataModal').modal('show');
+        }
+        
+        // 値のフォーマット
+        function formatValue(value, decimals = 1) {
+            if (value === null || value === undefined || value === '') return '-';
+            const num = parseFloat(value);
+            return isNaN(num) ? '-' : num.toFixed(decimals);
+        }
+        
+        // 日時のフォーマット
+        function formatDateTime(date, time) {
+            if (!date) return '-';
+            const d = new Date(date);
+            const formattedDate = d.toLocaleDateString('ja-JP');
+            const formattedTime = time || '';
+            return formattedTime ? `${formattedDate} ${formattedTime}` : formattedDate;
+        }
+        
+        // 品質バッジの生成
+        function getQualityBadge(qualityCheck) {
+            if (!qualityCheck || !qualityCheck.grade) {
+                return '<span class="badge badge-secondary">未評価</span>';
+            }
+            
+            const grade = qualityCheck.grade;
+            const score = qualityCheck.score || 0;
+            
+            let badgeClass = 'badge-secondary';
+            switch (grade) {
+                case 'A': badgeClass = 'badge-success'; break;
+                case 'B': badgeClass = 'badge-info'; break;
+                case 'C': badgeClass = 'badge-warning'; break;
+                case 'D': badgeClass = 'badge-danger'; break;
+            }
+            
+            return `<span class="badge ${badgeClass}">${grade} (${score})</span>`;
+        }
+        
+        function downloadReports() {
+            alert('レポートダウンロード機能は Phase 4 で実装予定です。');
+        }
+        
+        function viewSchedule() {
+            alert('スケジュール確認機能は Phase 2 で実装予定です。');
+        }
+        
+        function contactSupport() {
+            const supportEmail = 'support@weathering-co2-removal.com';
+            const subject = 'システムサポート依頼';
+            const body = `お客様: <?= user.companyName || user.email ?>\n\nお問い合わせ内容:\n\n`;
+            
+            const mailtoLink = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            if (confirm('メールクライアントでサポートにお問い合わせしますか？')) {
+                window.location.href = mailtoLink;
+            } else {
+                alert(`サポート連絡先:\nメール: ${supportEmail}\n電話: 03-XXXX-XXXX`);
+            }
+        }
+        
+        // データ更新機能
+        function refreshDashboard() {
+            google.script.run
+                .withSuccessHandler(function(newStats) {
+                    // 統計データの更新処理
+                    console.log('Dashboard refreshed:', newStats);
+                    location.reload();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Dashboard refresh failed:', error);
+                    alert('データの更新に失敗しました。ページを再読み込みしてください。');
+                })
+                .getCustomerDashboardStats('<?= user.customerId ?>');
+        }
+        
+        // 定期的なデータ更新（10分ごと）
+        setInterval(refreshDashboard, 600000);
+        
+        // プロジェクト詳細表示（サンプル）
+        function showProjectDetails(projectId) {
+            alert(`プロジェクト詳細表示機能は Phase 2 で実装予定です。\nプロジェクトID: ${projectId}`);
+        }
+        
+        // 測定データ簡易表示（サンプル）
+        function showLatestMeasurements() {
+            const sampleData = {
+                date: new Date().toLocaleDateString('ja-JP'),
+                co2Level: '245 ppm',
+                pH: '7.2',
+                temperature: '15.3°C',
+                efficiency: '92%'
+            };
+            
+            alert(`最新の測定データ（サンプル）:\n日時: ${sampleData.date}\nCO2濃度: ${sampleData.co2Level}\npH値: ${sampleData.pH}\n温度: ${sampleData.temperature}\n処理効率: ${sampleData.efficiency}`);
+        }
+        
+        // ページエラーハンドリング
+        window.addEventListener('error', function(e) {
+            console.error('Customer dashboard error:', e.error);
+        });
+        
+        // ユーザーガイド表示
+        function showUserGuide() {
+            const guide = `
+                === ダッシュボード利用ガイド ===
+                
+                1. プロジェクト進捗の確認
+                   - 現在進行中のプロジェクト一覧を表示
+                   - 各プロジェクトの進捗率と詳細情報
+                
+                2. 測定データの閲覧
+                   - CO2除去量、pH値、温度などの測定結果
+                   - 時系列でのデータ変化の確認
+                
+                3. レポートのダウンロード
+                   - 月次・年次の環境報告書
+                   - MRV（測定・報告・検証）レポート
+                
+                4. サポート連絡
+                   - 技術的な質問やシステムの使い方
+                   - データの解釈についての相談
+            `;
+            
+            alert(guide);
+        }
+        
+        // ショートカットキー（Alt+H でヘルプ表示）
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key === 'h') {
+                e.preventDefault();
+                showUserGuide();
+            }
+        });
+    </script>
+</body>
+</html>

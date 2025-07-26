@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>
+  </head>
+  <body>
+    <h1>測定データ管理</h1>
+    <p>CO2除去プロジェクトの測定データを管理します</p>
+    
+    <div class="navigation">
+      <a href="<?= getAppUrl() ?>?page=index">ホーム</a>
+      <a href="<?= getAppUrl() ?>?page=viewer">ビューアー</a>
+      <a href="<?= getAppUrl() ?>?page=analysis-simple">データ分析</a>
+    </div>
+    
+    <div class="content">
+      <!-- 統計サマリー -->
+      <div class="stat-cards">
+        <div class="stat-card">
+          <h3 id="totalRecords">0</h3>
+          <p>総測定回数</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avgCO2">0.0</h3>
+          <p>平均CO2濃度 (ppm)</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avgPH">0.0</h3>
+          <p>平均pH値</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avgTemp">0.0</h3>
+          <p>平均温度 (°C)</p>
+        </div>
+      </div>
+      
+      <!-- アラート表示エリア -->
+      <div id="alertArea" style="display: none;"></div>
+      
+      <!-- データ入力フォーム -->
+      <div class="form-simple">
+        <h3>新規測定データ入力</h3>
+        <form id="dataForm">
+          <label for="measurementDate">測定日:</label>
+          <input type="date" id="measurementDate" name="measurementDate" required>
+          
+          <label for="projectName">プロジェクト名:</label>
+          <select id="projectName" name="projectName" required>
+            <option value="">選択してください</option>
+            <option value="project-001">山田鉱業 CO2除去プロジェクト</option>
+            <option value="project-002">田中鉱山 廃水処理プロジェクト</option>
+            <option value="project-003">佐藤工業 環境改善プロジェクト</option>
+          </select>
+          
+          <label for="co2Level">CO2濃度 (ppm):</label>
+          <input type="number" id="co2Level" name="co2Level" step="0.1" min="0" max="1000" required>
+          
+          <label for="phValue">pH値:</label>
+          <input type="number" id="phValue" name="phValue" step="0.1" min="0" max="14" required>
+          
+          <label for="temperature">温度 (°C):</label>
+          <input type="number" id="temperature" name="temperature" step="0.1" min="-50" max="100" required>
+          
+          <label for="flowRate">流量 (L/min):</label>
+          <input type="number" id="flowRate" name="flowRate" step="0.1" min="0" required>
+          
+          <label for="rockDispersalAmount">岩石散布量 (kg):</label>
+          <input type="number" id="rockDispersalAmount" name="rockDispersalAmount" step="0.1" min="0" required>
+          
+          <label for="notes">備考:</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="追加の測定情報があれば記入してください"></textarea>
+          
+          <button type="submit">データを保存</button>
+          <button type="button" onclick="clearForm()" class="secondary">フォームをクリア</button>
+        </form>
+      </div>
+      
+      <!-- データ表示テーブル -->
+      <div class="data-table">
+        <h3>測定データ一覧</h3>
+        <div class="button-group">
+          <button onclick="loadData()">データを更新</button>
+          <button onclick="exportData()" class="secondary">CSVエクスポート</button>
+          <button onclick="showFilterDialog()" class="secondary">フィルター</button>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>測定日</th>
+              <th>プロジェクト</th>
+              <th>CO2濃度 (ppm)</th>
+              <th>pH値</th>
+              <th>温度 (°C)</th>
+              <th>流量 (L/min)</th>
+              <th>岩石散布量 (kg)</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
+                データを読み込み中...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <script>
+      console.log('測定データ管理画面 - Phase 3 シンプル版');
+      
+      // サンプルデータ（実際の実装ではGoogle Sheetsから取得）
+      let measurementData = [
+        {
+          id: 'M001',
+          date: '2024-12-19',
+          project: '山田鉱業 CO2除去プロジェクト',
+          co2: 450.2,
+          ph: 7.8,
+          temp: 22.5,
+          flow: 15.3,
+          rock: 125.0,
+          notes: '順調な測定値'
+        },
+        {
+          id: 'M002',
+          date: '2024-12-18',
+          project: '田中鉱山 廃水処理プロジェクト',
+          co2: 523.7,
+          ph: 8.1,
+          temp: 23.8,
+          flow: 18.7,
+          rock: 140.5,
+          notes: 'pH値がやや高め'
+        },
+        {
+          id: 'M003',
+          date: '2024-12-17',
+          project: '佐藤工業 環境改善プロジェクト',
+          co2: 398.1,
+          ph: 7.5,
+          temp: 21.2,
+          flow: 12.9,
+          rock: 110.0,
+          notes: '良好な結果'
+        }
+      ];
+      
+      // 初期化
+      document.addEventListener('DOMContentLoaded', function() {
+        loadData();
+        updateStatistics();
+        
+        // 現在の日付をデフォルト値に設定
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('measurementDate').value = today;
+      });
+      
+      // データ読み込み
+      function loadData() {
+        const tbody = document.getElementById('dataTableBody');
+        
+        if (measurementData.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #666;">データがありません</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = measurementData.map(item => `
+          <tr>
+            <td>${item.date}</td>
+            <td>${item.project}</td>
+            <td>${item.co2}</td>
+            <td>${item.ph}</td>
+            <td>${item.temp}</td>
+            <td>${item.flow}</td>
+            <td>${item.rock}</td>
+            <td>
+              <button onclick="editData('${item.id}')" style="padding: 5px 10px; margin-right: 5px; background: #17a2b8; color: white; border: none; border-radius: 3px;">編集</button>
+              <button onclick="deleteData('${item.id}')" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px;">削除</button>
+            </td>
+          </tr>
+        `).join('');
+        
+        updateStatistics();
+      }
+      
+      // 統計更新
+      function updateStatistics() {
+        if (measurementData.length === 0) {
+          document.getElementById('totalRecords').textContent = '0';
+          document.getElementById('avgCO2').textContent = '0.0';
+          document.getElementById('avgPH').textContent = '0.0';
+          document.getElementById('avgTemp').textContent = '0.0';
+          return;
+        }
+        
+        const total = measurementData.length;
+        const avgCO2 = (measurementData.reduce((sum, item) => sum + item.co2, 0) / total).toFixed(1);
+        const avgPH = (measurementData.reduce((sum, item) => sum + item.ph, 0) / total).toFixed(1);
+        const avgTemp = (measurementData.reduce((sum, item) => sum + item.temp, 0) / total).toFixed(1);
+        
+        document.getElementById('totalRecords').textContent = total;
+        document.getElementById('avgCO2').textContent = avgCO2;
+        document.getElementById('avgPH').textContent = avgPH;
+        document.getElementById('avgTemp').textContent = avgTemp;
+      }
+      
+      // フォーム送信処理
+      document.getElementById('dataForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const newData = {
+          id: 'M' + String(Date.now()).slice(-6),
+          date: formData.get('measurementDate'),
+          project: document.getElementById('projectName').selectedOptions[0].text,
+          co2: parseFloat(formData.get('co2Level')),
+          ph: parseFloat(formData.get('phValue')),
+          temp: parseFloat(formData.get('temperature')),
+          flow: parseFloat(formData.get('flowRate')),
+          rock: parseFloat(formData.get('rockDispersalAmount')),
+          notes: formData.get('notes') || ''
+        };
+        
+        // データ検証
+        if (!validateData(newData)) {
+          return;
+        }
+        
+        // データ追加
+        measurementData.unshift(newData);
+        
+        // 表示更新
+        loadData();
+        clearForm();
+        showAlert('success', '測定データが正常に保存されました。');
+      });
+      
+      // データ検証
+      function validateData(data) {
+        const errors = [];
+        
+        if (data.co2 < 0 || data.co2 > 1000) {
+          errors.push('CO2濃度は0-1000ppmの範囲で入力してください。');
+        }
+        
+        if (data.ph < 0 || data.ph > 14) {
+          errors.push('pH値は0-14の範囲で入力してください。');
+        }
+        
+        if (data.temp < -50 || data.temp > 100) {
+          errors.push('温度は-50°C～100°Cの範囲で入力してください。');
+        }
+        
+        if (data.flow < 0) {
+          errors.push('流量は0以上の値を入力してください。');
+        }
+        
+        if (data.rock < 0) {
+          errors.push('岩石散布量は0以上の値を入力してください。');
+        }
+        
+        if (errors.length > 0) {
+          showAlert('error', errors.join('<br>'));
+          return false;
+        }
+        
+        return true;
+      }
+      
+      // フォームクリア
+      function clearForm() {
+        document.getElementById('dataForm').reset();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('measurementDate').value = today;
+      }
+      
+      // データ編集
+      function editData(id) {
+        const item = measurementData.find(data => data.id === id);
+        if (!item) return;
+        
+        // フォームに値を設定
+        document.getElementById('measurementDate').value = item.date;
+        document.getElementById('projectName').value = getProjectValue(item.project);
+        document.getElementById('co2Level').value = item.co2;
+        document.getElementById('phValue').value = item.ph;
+        document.getElementById('temperature').value = item.temp;
+        document.getElementById('flowRate').value = item.flow;
+        document.getElementById('rockDispersalAmount').value = item.rock;
+        document.getElementById('notes').value = item.notes;
+        
+        // 元のデータを削除
+        deleteData(id);
+        
+        showAlert('info', '編集モード: データをフォームに読み込みました。修正後、保存してください。');
+      }
+      
+      // プロジェクト名から値を取得
+      function getProjectValue(projectName) {
+        const select = document.getElementById('projectName');
+        for (let option of select.options) {
+          if (option.text === projectName) {
+            return option.value;
+          }
+        }
+        return '';
+      }
+      
+      // データ削除
+      function deleteData(id) {
+        if (confirm('このデータを削除してもよろしいですか？')) {
+          measurementData = measurementData.filter(data => data.id !== id);
+          loadData();
+          showAlert('success', 'データが削除されました。');
+        }
+      }
+      
+      // CSVエクスポート
+      function exportData() {
+        if (measurementData.length === 0) {
+          showAlert('warning', 'エクスポートするデータがありません。');
+          return;
+        }
+        
+        const headers = ['測定日', 'プロジェクト', 'CO2濃度(ppm)', 'pH値', '温度(°C)', '流量(L/min)', '岩石散布量(kg)', '備考'];
+        const csvContent = [
+          headers.join(','),
+          ...measurementData.map(item => [
+            item.date,
+            `"${item.project}"`,
+            item.co2,
+            item.ph,
+            item.temp,
+            item.flow,
+            item.rock,
+            `"${item.notes}"`
+          ].join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `measurement_data_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        showAlert('success', 'CSVファイルをダウンロードしました。');
+      }
+      
+      // フィルター表示（簡易版）
+      function showFilterDialog() {
+        const project = prompt('フィルターするプロジェクト名を入力してください（空白で全て表示）:');
+        
+        if (project === null) return; // キャンセル
+        
+        const tbody = document.getElementById('dataTableBody');
+        
+        if (project === '') {
+          // 全て表示
+          loadData();
+          return;
+        }
+        
+        const filteredData = measurementData.filter(item => 
+          item.project.toLowerCase().includes(project.toLowerCase())
+        );
+        
+        if (filteredData.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #666;">該当するデータがありません</td></tr>';
+          showAlert('info', `"${project}"に該当するデータが見つかりませんでした。`);
+        } else {
+          tbody.innerHTML = filteredData.map(item => `
+            <tr>
+              <td>${item.date}</td>
+              <td>${item.project}</td>
+              <td>${item.co2}</td>
+              <td>${item.ph}</td>
+              <td>${item.temp}</td>
+              <td>${item.flow}</td>
+              <td>${item.rock}</td>
+              <td>
+                <button onclick="editData('${item.id}')" style="padding: 5px 10px; margin-right: 5px; background: #17a2b8; color: white; border: none; border-radius: 3px;">編集</button>
+                <button onclick="deleteData('${item.id}')" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px;">削除</button>
+              </td>
+            </tr>
+          `).join('');
+          showAlert('info', `"${project}"に該当するデータ ${filteredData.length}件を表示しています。`);
+        }
+      }
+      
+      // アラート表示
+      function showAlert(type, message) {
+        const alertArea = document.getElementById('alertArea');
+        alertArea.innerHTML = `<div class="alert ${type}">${message}</div>`;
+        alertArea.style.display = 'block';
+        
+        // 3秒後に自動で非表示
+        setTimeout(() => {
+          alertArea.style.display = 'none';
+        }, 3000);
+      }
+      
+      // エラーハンドリング
+      window.addEventListener('error', function(e) {
+        console.error('JavaScript エラー:', e.error);
+        showAlert('error', 'システムエラーが発生しました。ページを再読み込みしてください。');
+        return true;
+      });
+    </script>
+  </body>
+</html>

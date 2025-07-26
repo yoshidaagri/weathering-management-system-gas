@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 分析ダッシュボード</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-text {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .btn-outline-light {
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+        
+        .page-title {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+        
+        .analysis-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .analysis-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: #6f42c1;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6f42c1;
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.15);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6f42c1;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .metric-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            color: #28a745;
+        }
+        
+        .trend-down {
+            color: #dc3545;
+        }
+        
+        .trend-stable {
+            color: #6c757d;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            min-height: 400px;
+        }
+        
+        .chart-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            color: #6c757d;
+            flex-direction: column;
+        }
+        
+        .chart-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 8px 16px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a32a3 0%, #4a2c8a 100%);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-primary {
+            border-color: #6f42c1;
+            color: #6f42c1;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 8px 12px;
+        }
+        
+        .form-control:focus {
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+        
+        .analysis-tabs {
+            margin-bottom: 25px;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 8px 8px 0 0;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .efficiency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .efficiency-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .efficiency-percentage {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6f42c1;
+            margin-bottom: 10px;
+        }
+        
+        .efficiency-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .benchmark-comparison {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            z-index: 10;
+        }
+        
+        .recommendation-card {
+            border-left: 4px solid #ffc107;
+            background: #fff3cd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-card.high-priority {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .recommendation-card.medium-priority {
+            border-left-color: #fd7e14;
+            background: #fed7aa;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .recommendation-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .trend-indicator i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="?page=admin-dashboard">
+                <i class="fas fa-chart-line"></i> <?= appName ?>
+            </a>
+            
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-shield"></i> <?= user.name || user.email ?>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ログアウト
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- ページヘッダー -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i> 分析ダッシュボード
+            </h1>
+            <p class="page-subtitle">
+                CO2除去効率、環境データトレンド、プロジェクト比較分析
+            </p>
+        </div>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <!-- 分析コントロール -->
+        <div class="analysis-controls">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="analysisProject">分析対象プロジェクト</label>
+                    <select class="form-control" id="analysisProject">
+                        <option value="">プロジェクトを選択</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="analysisPeriod">分析期間</label>
+                    <select class="form-control" id="analysisPeriod">
+                        <option value="week">過去1週間</option>
+                        <option value="month" selected>過去1ヶ月</option>
+                        <option value="quarter">過去3ヶ月</option>
+                        <option value="year">過去1年</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="analysisMetric">分析メトリック</label>
+                    <select class="form-control" id="analysisMetric">
+                        <option value="co2">CO2濃度</option>
+                        <option value="ph">pH値</option>
+                        <option value="temperature">温度</option>
+                        <option value="flowRate">流量</option>
+                        <option value="removal">CO2除去量</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>&nbsp;</label>
+                    <div class="d-flex">
+                        <button class="btn btn-primary mr-2" onclick="runAnalysis()">
+                            <i class="fas fa-play"></i> 分析実行
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="exportAnalysis()">
+                            <i class="fas fa-download"></i> エクスポート
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-success btn-block" onclick="generateReport()">
+                        <i class="fas fa-file-alt"></i> レポート生成
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分析タブ -->
+        <div class="analysis-tabs">
+            <ul class="nav nav-tabs" id="analysisTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="efficiency-tab" data-toggle="tab" href="#efficiency" role="tab">
+                        <i class="fas fa-tachometer-alt"></i> 効率分析
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="trends-tab" data-toggle="tab" href="#trends" role="tab">
+                        <i class="fas fa-chart-line"></i> トレンド分析
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="comparison-tab" data-toggle="tab" href="#comparison" role="tab">
+                        <i class="fas fa-balance-scale"></i> プロジェクト比較
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="quality-tab" data-toggle="tab" href="#quality" role="tab">
+                        <i class="fas fa-check-circle"></i> 品質分析
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="analysisTabContent">
+                <!-- 効率分析タブ -->
+                <div class="tab-pane fade show active" id="efficiency" role="tabpanel">
+                    <h5 class="section-title">
+                        <i class="fas fa-tachometer-alt"></i> CO2除去効率分析
+                    </h5>
+                    
+                    <!-- 効率メトリクス -->
+                    <div class="efficiency-grid" id="efficiencyMetrics">
+                        <div class="efficiency-card">
+                            <div class="efficiency-percentage" id="averageEfficiency">-</div>
+                            <div class="efficiency-label">平均効率</div>
+                            <div class="trend-indicator" id="efficiencyTrend">
+                                <i class="fas fa-minus"></i> データ不足
+                            </div>
+                        </div>
+                        <div class="efficiency-card">
+                            <div class="efficiency-percentage" id="maxEfficiency">-</div>
+                            <div class="efficiency-label">最大効率</div>
+                        </div>
+                        <div class="efficiency-card">
+                            <div class="efficiency-percentage" id="targetProgress">-</div>
+                            <div class="efficiency-label">目標達成率</div>
+                        </div>
+                        <div class="efficiency-card">
+                            <div class="efficiency-percentage" id="totalCO2Removed">-</div>
+                            <div class="efficiency-label">総CO2除去量 (kg)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- ベンチマーク比較 -->
+                    <div class="benchmark-comparison" id="benchmarkComparison">
+                        <h6><i class="fas fa-chart-bar"></i> 業界ベンチマーク比較</h6>
+                        <div class="comparison-item">
+                            <span>効率 vs 業界平均:</span>
+                            <span id="efficiencyVsBenchmark">-</span>
+                        </div>
+                        <div class="comparison-item">
+                            <span>CO2除去量 vs 業界平均:</span>
+                            <span id="co2VsBenchmark">-</span>
+                        </div>
+                        <div class="comparison-item">
+                            <span>品質スコア vs 業界平均:</span>
+                            <span id="qualityVsBenchmark">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 効率チャート -->
+                    <div class="chart-container">
+                        <h6><i class="fas fa-chart-area"></i> 効率推移</h6>
+                        <div class="chart-placeholder" id="efficiencyChart">
+                            <i class="fas fa-chart-area"></i>
+                            <div>効率推移チャートはChart.jsで実装予定</div>
+                            <small class="text-muted">分析を実行してデータを表示</small>
+                        </div>
+                    </div>
+                    
+                    <!-- 推奨事項 -->
+                    <div id="efficiencyRecommendations">
+                        <h6><i class="fas fa-lightbulb"></i> 推奨事項</h6>
+                        <div id="recommendationsList">
+                            <!-- JavaScriptで動的に生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- トレンド分析タブ -->
+                <div class="tab-pane fade" id="trends" role="tabpanel">
+                    <h5 class="section-title">
+                        <i class="fas fa-chart-line"></i> 環境データトレンド分析
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- トレンドチャート -->
+                            <div class="chart-container">
+                                <h6 id="trendChartTitle"><i class="fas fa-chart-line"></i> CO2濃度トレンド</h6>
+                                <div class="chart-placeholder" id="trendChart">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>トレンドチャートはChart.jsで実装予定</div>
+                                    <small class="text-muted">分析を実行してデータを表示</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <!-- トレンド統計 -->
+                            <div class="analysis-section">
+                                <h6><i class="fas fa-calculator"></i> 統計情報</h6>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="trendAverage">-</div>
+                                    <div class="metric-label">平均値</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="trendStdDev">-</div>
+                                    <div class="metric-label">標準偏差</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="trendVariation">-</div>
+                                    <div class="metric-label">変動係数</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 異常値検知 -->
+                            <div class="analysis-section">
+                                <h6><i class="fas fa-exclamation-triangle"></i> 異常値</h6>
+                                <div id="anomaliesList">
+                                    <p class="text-muted">分析を実行して異常値を検出</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 予測 -->
+                    <div class="chart-container">
+                        <h6><i class="fas fa-crystal-ball"></i> 30日予測</h6>
+                        <div class="chart-placeholder" id="forecastChart">
+                            <i class="fas fa-crystal-ball"></i>
+                            <div>予測チャートはChart.jsで実装予定</div>
+                            <small class="text-muted">分析を実行して予測データを表示</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- プロジェクト比較タブ -->
+                <div class="tab-pane fade" id="comparison" role="tabpanel">
+                    <h5 class="section-title">
+                        <i class="fas fa-balance-scale"></i> プロジェクト比較分析
+                    </h5>
+                    
+                    <!-- 比較対象選択 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="comparisonProjects">比較対象プロジェクト（複数選択）</label>
+                            <select class="form-control" id="comparisonProjects" multiple size="5">
+                                <!-- JavaScriptで動的に生成 -->
+                            </select>
+                            <small class="form-text text-muted">Ctrlキーを押しながらクリックで複数選択</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary btn-block" onclick="runComparison()">
+                                <i class="fas fa-balance-scale"></i> 比較実行
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 比較結果 -->
+                    <div id="comparisonResults" style="display: none;">
+                        <!-- ランキング -->
+                        <div class="analysis-section">
+                            <h6><i class="fas fa-trophy"></i> 効率ランキング</h6>
+                            <div id="efficiencyRanking">
+                                <!-- JavaScriptで動的に生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 比較チャート -->
+                        <div class="chart-container">
+                            <h6><i class="fas fa-chart-bar"></i> プロジェクト比較</h6>
+                            <div class="chart-placeholder" id="comparisonChart">
+                                <i class="fas fa-chart-bar"></i>
+                                <div>比較チャートはChart.jsで実装予定</div>
+                                <small class="text-muted">比較を実行してデータを表示</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 品質分析タブ -->
+                <div class="tab-pane fade" id="quality" role="tabpanel">
+                    <h5 class="section-title">
+                        <i class="fas fa-check-circle"></i> データ品質分析
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- 品質メトリクス -->
+                            <div class="analysis-section">
+                                <h6><i class="fas fa-clipboard-check"></i> 品質メトリクス</h6>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="qualityScore">-</div>
+                                    <div class="metric-label">平均品質スコア</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="qualityGradeA">-</div>
+                                    <div class="metric-label">Aグレード率 (%)</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" id="alertCount">-</div>
+                                    <div class="metric-label">アラート数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <!-- 品質分布 -->
+                            <div class="chart-container">
+                                <h6><i class="fas fa-chart-pie"></i> 品質グレード分布</h6>
+                                <div class="chart-placeholder" id="qualityDistribution">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <div>品質分布チャートはChart.jsで実装予定</div>
+                                    <small class="text-muted">分析を実行してデータを表示</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- アラート詳細 -->
+                    <div class="analysis-section">
+                        <h6><i class="fas fa-exclamation-circle"></i> アラート詳細</h6>
+                        <div id="alertDetails">
+                            <p class="text-muted">分析を実行してアラート詳細を表示</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let projects = [];
+        let currentAnalysisData = null;
+        
+        // ページ初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+        
+        function initializePage() {
+            console.log('分析ダッシュボードを初期化中...');
+            
+            // プロジェクトデータを読み込み
+            loadProjects();
+            
+            // システムレポート生成（初期表示用）
+            generateSystemReport();
+        }
+        
+        function loadProjects() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        projects = result.data;
+                        populateProjectSelects();
+                    } else {
+                        console.error('プロジェクト読み込みエラー:', result.message);
+                        showAlert('プロジェクトの読み込みに失敗しました', 'warning');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('プロジェクト読み込み失敗:', error);
+                    showAlert('プロジェクトデータの取得中にエラーが発生しました', 'danger');
+                })
+                .loadProjectsData();
+        }
+        
+        function populateProjectSelects() {
+            const selects = ['#analysisProject', '#comparisonProjects'];
+            
+            selects.forEach(selector => {
+                const select = $(selector);
+                const currentValue = select.val();
+                
+                // 最初のオプション以外をクリア
+                select.find('option:not(:first)').remove();
+                
+                // プロジェクトオプションを追加
+                projects.forEach(project => {
+                    const option = $('<option>', {
+                        value: project.projectId,
+                        text: `${project.projectName} (${project.customerName})`
+                    });
+                    select.append(option);
+                });
+                
+                // 前の値があれば復元
+                if (currentValue) {
+                    select.val(currentValue);
+                }
+            });
+        }
+        
+        function runAnalysis() {
+            const projectId = $('#analysisProject').val();
+            const period = $('#analysisPeriod').val();
+            
+            if (!projectId) {
+                showAlert('分析対象のプロジェクトを選択してください', 'warning');
+                return;
+            }
+            
+            showLoading('効率分析を実行中...');
+            
+            // CO2除去効率分析を実行
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        currentAnalysisData = result.data;
+                        updateEfficiencyDisplay(result.data);
+                        showAlert('効率分析が完了しました', 'success');
+                    } else {
+                        showAlert('効率分析に失敗しました: ' + result.message, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    showAlert('効率分析中にエラーが発生しました', 'danger');
+                    console.error('Analysis error:', error);
+                })
+                .getCO2RemovalEfficiency(projectId, period);
+                
+            // トレンド分析も実行
+            const metric = $('#analysisMetric').val();
+            runTrendAnalysis(projectId, metric, period);
+        }
+        
+        function runTrendAnalysis(projectId, metric, period) {
+            showLoading('トレンド分析を実行中...');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        updateTrendDisplay(result.data, metric);
+                    } else {
+                        console.error('トレンド分析エラー:', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    console.error('Trend analysis error:', error);
+                })
+                .analyzeEnvironmentalTrends(projectId, metric, { period: period });
+        }
+        
+        function updateEfficiencyDisplay(data) {
+            // 効率メトリクスを更新
+            $('#averageEfficiency').text(data.efficiency.averageEfficiency + '%');
+            $('#maxEfficiency').text(data.efficiency.maxEfficiency + '%');
+            $('#targetProgress').text(data.efficiency.targetProgress + '%');
+            $('#totalCO2Removed').text(data.efficiency.totalCO2Removed.toLocaleString());
+            
+            // トレンド指標を更新
+            updateTrendIndicator('#efficiencyTrend', data.trends.efficiencyTrend);
+            
+            // ベンチマーク比較を更新
+            if (data.comparison) {
+                const efficiencyDiff = data.comparison.efficiencyVsBenchmark;
+                const co2Diff = data.comparison.co2RemovalVsBenchmark;
+                const qualityDiff = data.comparison.qualityVsBenchmark;
+                
+                $('#efficiencyVsBenchmark').text(formatPercentageDiff(efficiencyDiff));
+                $('#co2VsBenchmark').text(formatPercentageDiff(co2Diff));
+                $('#qualityVsBenchmark').text(formatPercentageDiff(qualityDiff));
+                
+                // 色分け
+                updateComparisonColor('#efficiencyVsBenchmark', efficiencyDiff);
+                updateComparisonColor('#co2VsBenchmark', co2Diff);
+                updateComparisonColor('#qualityVsBenchmark', qualityDiff);
+            }
+            
+            // 推奨事項を更新
+            if (data.analysis && data.analysis.recommendations) {
+                updateRecommendations(data.analysis.recommendations);
+            }
+        }
+        
+        function updateTrendDisplay(data, metric) {
+            // チャートタイトルを更新
+            const metricNames = {
+                'co2': 'CO2濃度',
+                'ph': 'pH値',
+                'temperature': '温度',
+                'flowRate': '流量',
+                'removal': 'CO2除去量'
+            };
+            
+            $('#trendChartTitle').html(`<i class="fas fa-chart-line"></i> ${metricNames[metric]}トレンド`);
+            
+            // 統計情報を更新
+            if (data.statistics) {
+                $('#trendAverage').text(data.statistics.mean ? data.statistics.mean.toFixed(2) : '-');
+                $('#trendStdDev').text(data.statistics.standardDeviation ? data.statistics.standardDeviation.toFixed(2) : '-');
+                $('#trendVariation').text(data.statistics.coefficientOfVariation ? 
+                    (data.statistics.coefficientOfVariation * 100).toFixed(1) + '%' : '-');
+            }
+            
+            // 異常値を更新
+            if (data.anomalies && data.anomalies.length > 0) {
+                updateAnomaliesList(data.anomalies);
+            } else {
+                $('#anomaliesList').html('<p class="text-muted">異常値は検出されませんでした</p>');
+            }
+        }
+        
+        function updateTrendIndicator(selector, trend) {
+            const element = $(selector);
+            element.removeClass('trend-up trend-down trend-stable');
+            
+            switch (trend) {
+                case 'improving':
+                    element.addClass('trend-up');
+                    element.html('<i class="fas fa-arrow-up"></i> 改善傾向');
+                    break;
+                case 'declining':
+                    element.addClass('trend-down');
+                    element.html('<i class="fas fa-arrow-down"></i> 低下傾向');
+                    break;
+                case 'stable':
+                    element.addClass('trend-stable');
+                    element.html('<i class="fas fa-minus"></i> 安定');
+                    break;
+                default:
+                    element.addClass('trend-stable');
+                    element.html('<i class="fas fa-minus"></i> データ不足');
+            }
+        }
+        
+        function formatPercentageDiff(diff) {
+            if (diff === null || diff === undefined) return '-';
+            
+            const sign = diff > 0 ? '+' : '';
+            return sign + diff.toFixed(1) + '%';
+        }
+        
+        function updateComparisonColor(selector, value) {
+            const element = $(selector);
+            element.removeClass('text-success text-danger text-warning');
+            
+            if (value > 5) {
+                element.addClass('text-success');
+            } else if (value < -5) {
+                element.addClass('text-danger');
+            } else {
+                element.addClass('text-warning');
+            }
+        }
+        
+        function updateRecommendations(recommendations) {
+            const container = $('#recommendationsList');
+            container.empty();
+            
+            if (recommendations.length === 0) {
+                container.html('<p class="text-muted">現在、特別な推奨事項はありません。</p>');
+                return;
+            }
+            
+            recommendations.forEach(rec => {
+                const priorityClass = rec.priority === 'high' ? 'high-priority' : 
+                                    rec.priority === 'medium' ? 'medium-priority' : '';
+                
+                const card = $(`
+                    <div class="recommendation-card ${priorityClass}">
+                        <div class="recommendation-title">${rec.title}</div>
+                        <p class="recommendation-desc">${rec.description}</p>
+                    </div>
+                `);
+                
+                container.append(card);
+            });
+        }
+        
+        function updateAnomaliesList(anomalies) {
+            const container = $('#anomaliesList');
+            container.empty();
+            
+            anomalies.slice(0, 5).forEach(anomaly => { // 最大5件表示
+                const item = $(`
+                    <div class="alert alert-warning" role="alert">
+                        <small>
+                            <strong>${anomaly.date}</strong><br>
+                            値: ${anomaly.value}<br>
+                            ${anomaly.description || '異常値が検出されました'}
+                        </small>
+                    </div>
+                `);
+                
+                container.append(item);
+            });
+            
+            if (anomalies.length > 5) {
+                container.append(`<p class="text-muted">他 ${anomalies.length - 5} 件の異常値</p>`);
+            }
+        }
+        
+        function runComparison() {
+            const selectedProjects = $('#comparisonProjects').val();
+            
+            if (!selectedProjects || selectedProjects.length < 2) {
+                showAlert('比較には2つ以上のプロジェクトを選択してください', 'warning');
+                return;
+            }
+            
+            showLoading('プロジェクト比較を実行中...');
+            
+            const period = $('#analysisPeriod').val();
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        updateComparisonDisplay(result.data);
+                        $('#comparisonResults').show();
+                        showAlert('プロジェクト比較が完了しました', 'success');
+                    } else {
+                        showAlert('プロジェクト比較に失敗しました: ' + result.message, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    showAlert('プロジェクト比較中にエラーが発生しました', 'danger');
+                    console.error('Comparison error:', error);
+                })
+                .compareProjects(selectedProjects, period);
+        }
+        
+        function updateComparisonDisplay(data) {
+            // ランキング表示
+            if (data.rankings) {
+                updateEfficiencyRanking(data.rankings);
+            }
+        }
+        
+        function updateEfficiencyRanking(rankings) {
+            const container = $('#efficiencyRanking');
+            container.empty();
+            
+            rankings.efficiency.forEach((item, index) => {
+                const project = projects.find(p => p.projectId === item.projectId);
+                const projectName = project ? project.projectName : item.projectId;
+                
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+                
+                const rankItem = $(`
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${medal} ${projectName}</span>
+                        <span class="font-weight-bold">${item.value.toFixed(1)}%</span>
+                    </div>
+                `);
+                
+                container.append(rankItem);
+            });
+        }
+        
+        function generateSystemReport() {
+            showLoading('システムレポートを生成中...');
+            
+            const period = $('#analysisPeriod').val();
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        updateSystemReportDisplay(result.data);
+                        showAlert('システムレポートが生成されました', 'success');
+                    } else {
+                        showAlert('システムレポート生成に失敗しました: ' + result.message, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    showAlert('システムレポート生成中にエラーが発生しました', 'danger');
+                    console.error('System report error:', error);
+                })
+                .generateSystemReport({ period: period });
+        }
+        
+        function updateSystemReportDisplay(data) {
+            // システム統計を表示
+            if (data.systemStats) {
+                console.log('システム統計:', data.systemStats);
+            }
+            
+            // 品質メトリクスを表示
+            if (data.qualityMetrics) {
+                $('#qualityScore').text(data.qualityMetrics.averageScore || '-');
+                $('#qualityGradeA').text(data.qualityMetrics.gradeAPercentage || '-');
+                $('#alertCount').text(data.qualityMetrics.totalAlerts || '-');
+            }
+        }
+        
+        function showLoading(message = '処理中...') {
+            // 既存のローディングオーバーレイを削除
+            $('.loading-overlay').remove();
+            
+            const overlay = $(`
+                <div class="loading-overlay">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div>${message}</div>
+                    </div>
+                </div>
+            `);
+            
+            $('.analysis-section').first().css('position', 'relative').append(overlay);
+        }
+        
+        function hideLoading() {
+            $('.loading-overlay').remove();
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            $('.container').first().prepend(alertHtml);
+            
+            // 5秒後に自動削除
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+        
+        // イベントハンドラー
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                window.location.href = '?';
+            }
+        }
+        
+        function exportAnalysis() {
+            if (!currentAnalysisData) {
+                showAlert('エクスポートするデータがありません。まず分析を実行してください。', 'warning');
+                return;
+            }
+            
+            // 分析データをJSONとしてダウンロード（簡易実装）
+            const dataStr = JSON.stringify(currentAnalysisData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analysis_${new Date().getTime()}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showAlert('分析データをエクスポートしました', 'success');
+        }
+        
+        function generateReport() {
+            generateSystemReport();
+        }
+        
+        // タブ切り替え時の処理
+        $('#analysisTab a').on('click', function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+        
+        // 分析メトリック変更時の処理
+        $('#analysisMetric').on('change', function() {
+            const projectId = $('#analysisProject').val();
+            const period = $('#analysisPeriod').val();
+            const metric = $(this).val();
+            
+            if (projectId) {
+                runTrendAnalysis(projectId, metric, period);
+            }
+        });
+    </script>
+</body>
+</html>

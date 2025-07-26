@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>
+  </head>
+  <body>
+    <h1>Viewer Page</h1>
+    <p>これはViewerページです</p>
+    
+    <div class="navigation">
+      <a href="<?= getAppUrl() ?>?page=viewer">Viewer へ</a>
+      <a href="<?= getAppUrl() ?>?page=index">Index へ</a>
+    </div>
+    
+    <div class="content">
+      <h2>ビューアー機能</h2>
+      <p>このページでは様々なデータを表示できます。</p>
+      <p>ナビゲーションリンクをクリックしてIndex画面に戻ることができます。</p>
+    </div>
+  </body>
+</html>

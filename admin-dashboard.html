@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 管理者ダッシュボード</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-text {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .btn-outline-light {
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .dashboard-container {
+            padding: 30px 0;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .stats-icon.customers {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stats-icon.projects {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .stats-icon.measurements {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .stats-icon.system {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 15px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn i {
+            margin-right: 10px;
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .activity-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            margin-right: 15px;
+        }
+        
+        .activity-icon.success {
+            background: #28a745;
+        }
+        
+        .activity-icon.warning {
+            background: #ffc107;
+        }
+        
+        .activity-icon.info {
+            background: #17a2b8;
+        }
+        
+        .activity-text {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .system-status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .system-status i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: #f093fb;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-leaf"></i> <?= appName ?>
+            </a>
+            
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-shield"></i> 管理者: <?= user.name ?>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ログアウト
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- メインコンテンツ -->
+    <div class="dashboard-container">
+        <div class="container">
+            <!-- システム状態 -->
+            <div class="system-status">
+                <i class="fas fa-check-circle"></i>
+                システム正常稼働中 - 最終更新: <?= new Date(stats.lastUpdated).toLocaleString('ja-JP') ?>
+            </div>
+            
+            <!-- 統計サマリー -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon customers">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stats-number"><?= stats.totalCustomers ?></div>
+                        <p class="stats-label">登録顧客数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon projects">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stats-number"><?= stats.totalProjects ?></div>
+                        <p class="stats-label">総プロジェクト数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon measurements">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div class="stats-number" id="totalMeasurements">-</div>
+                        <p class="stats-label">測定データ数</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-icon system">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stats-number"><?= stats.systemStatus === 'Normal' ? '正常' : 'エラー' ?></div>
+                        <p class="stats-label">システム状態</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- メインダッシュボード -->
+            <div class="row">
+                <!-- クイックアクション -->
+                <div class="col-md-6">
+                    <div class="quick-actions">
+                        <h3 class="section-title">
+                            <i class="fas fa-bolt"></i> クイックアクション
+                        </h3>
+                        
+                        <a href="?page=customers" class="action-btn">
+                            <i class="fas fa-users"></i> 顧客管理
+                        </a>
+                        
+                        <a href="?page=projects" class="action-btn">
+                            <i class="fas fa-project-diagram"></i> プロジェクト管理
+                        </a>
+                        
+                        <a href="?page=measurements" class="action-btn">
+                            <i class="fas fa-flask"></i> 測定データ管理
+                        </a>
+                        
+                        <a href="?page=analytics" class="action-btn">
+                            <i class="fas fa-chart-line"></i> 分析ダッシュボード
+                        </a>
+                        
+                        <a href="#" class="action-btn" onclick="openReports()">
+                            <i class="fas fa-file-alt"></i> レポート生成
+                        </a>
+                        
+                        <a href="#" class="action-btn" onclick="openSystemSettings()">
+                            <i class="fas fa-cogs"></i> システム設定
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 最近のアクティビティ -->
+                <div class="col-md-6">
+                    <div class="recent-activity">
+                        <h3 class="section-title">
+                            <i class="fas fa-clock"></i> 最近のアクティビティ
+                        </h3>
+                        
+                        <div class="activity-item">
+                            <div class="d-flex align-items-center">
+                                <div class="activity-icon success">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="activity-text">
+                                    <div class="activity-title">システム品質チェック完了</div>
+                                    <div class="activity-time">Phase 1 - 全項目PASS</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="d-flex align-items-center">
+                                <div class="activity-icon info">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-text">
+                                    <div class="activity-title">管理者ログイン</div>
+                                    <div class="activity-time"><?= user.email ?> - <?= new Date().toLocaleString('ja-JP') ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="d-flex align-items-center">
+                                <div class="activity-icon warning">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="activity-text">
+                                    <div class="activity-title">データベース初期化</div>
+                                    <div class="activity-time">基盤システム構築完了</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewAllActivity()">
+                                <i class="fas fa-list"></i> 全てのアクティビティを表示
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 開発・テスト用セクション -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="quick-actions">
+                        <h3 class="section-title">
+                            <i class="fas fa-tools"></i> 開発・テストツール
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-info btn-block mb-2" onclick="runSystemTests()">
+                                    <i class="fas fa-vial"></i> システムテスト実行
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-success btn-block mb-2" onclick="runQualityCheck()">
+                                    <i class="fas fa-check-double"></i> 品質チェック実行
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning btn-block mb-2" onclick="viewSystemLogs()">
+                                    <i class="fas fa-list-alt"></i> システムログ表示
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-secondary btn-block mb-2" onclick="exportData()">
+                                    <i class="fas fa-download"></i> データエクスポート
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- テスト結果表示エリア -->
+                        <div id="testResults" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle"></i> テスト結果</h5>
+                                <pre id="testOutput"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin dashboard loaded');
+        });
+        
+        // ログアウト
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                window.location.href = '?';
+            }
+        }
+        
+        // クイックアクション関数群
+        function openCustomerManagement() {
+            window.location.href = '?page=customers';
+        }
+        
+        function openProjectManagement() {
+            window.location.href = '?page=projects';
+        }
+        
+        // ページ初期化時に測定データ統計を読み込み
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMeasurementStats();
+        });
+        
+        function loadMeasurementStats() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        document.getElementById('totalMeasurements').textContent = 
+                            (result.data.totalMeasurements || 0).toLocaleString();
+                    } else {
+                        console.error('測定データ統計読み込みエラー:', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('測定データ統計読み込み失敗:', error);
+                    document.getElementById('totalMeasurements').textContent = '0';
+                })
+                .getMeasurementStats();
+        }
+        
+        function openReports() {
+            alert('レポート生成機能は Phase 4 で実装予定です。');
+        }
+        
+        function openSystemSettings() {
+            alert('システム設定機能は Phase 4 で実装予定です。');
+        }
+        
+        function viewAllActivity() {
+            alert('アクティビティ詳細機能は Phase 2 で実装予定です。');
+        }
+        
+        // テスト・開発ツール関数群
+        function runSystemTests() {
+            showTestResults('システムテスト実行中...');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showTestResults(JSON.stringify(result, null, 2));
+                })
+                .withFailureHandler(function(error) {
+                    showTestResults('エラー: ' + error.message);
+                })
+                .runPhase1Tests();
+        }
+        
+        function runQualityCheck() {
+            showTestResults('品質チェック実行中...');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showTestResults(JSON.stringify(result, null, 2));
+                })
+                .withFailureHandler(function(error) {
+                    showTestResults('エラー: ' + error.message);
+                })
+                .runPhase1QualityCheck();
+        }
+        
+        function viewSystemLogs() {
+            showTestResults('システムログ取得中...');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    const logs = result || [];
+                    if (logs.length === 0) {
+                        showTestResults('システムログが見つかりません。');
+                    } else {
+                        showTestResults(JSON.stringify(logs, null, 2));
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showTestResults('エラー: ' + error.message);
+                })
+                .getSystemLogs();
+        }
+        
+        function exportData() {
+            if (confirm('現在のシステムデータをエクスポートしますか？')) {
+                showTestResults('データエクスポート機能は Phase 2 で実装予定です。');
+            }
+        }
+        
+        function showTestResults(content) {
+            const resultsDiv = document.getElementById('testResults');
+            const outputPre = document.getElementById('testOutput');
+            
+            outputPre.textContent = content;
+            resultsDiv.style.display = 'block';
+            
+            // 結果エリアまでスクロール
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // 定期的な統計更新（オプション）
+        function updateStats() {
+            google.script.run
+                .withSuccessHandler(function(newStats) {
+                    // 統計データの更新処理
+                    console.log('Stats updated:', newStats);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Stats update failed:', error);
+                })
+                .getAdminDashboardStats();
+            
+            // 測定データ統計も更新
+            loadMeasurementStats();
+        }
+        
+        // 5分ごとに統計を更新
+        setInterval(updateStats, 300000);
+        
+        // ページエラーハンドリング
+        window.addEventListener('error', function(e) {
+            console.error('Dashboard error:', e.error);
+        });
+    </script>
+</body>
+</html>

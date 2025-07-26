@@ -1,0 +1,321 @@
+## 2. .Cursorrule（Cursor用ルール）
+
+```markdown
+# .Cursorrule - Cursor開発ガイドライン
+
+## 役割と責任範囲
+
+### ✅ Cursorが担当する作業
+1. **受入テスト（統合テスト）**
+   - 複数コンポーネントの連携テスト
+   - API統合テスト
+   - シナリオベースのテスト
+
+2. **CI/CDパイプライン**
+   - GitHub Actions設定
+   - 自動デプロイスクリプト
+   - 環境変数管理
+
+3. **E2Eテスト（PlaywrightMCP使用）**
+   - ブラウザ自動テスト
+   - ユーザーフロー検証
+   - クロスブラウザテスト
+
+4. **リファクタリング**
+   - 既存コードの最適化
+   - パフォーマンス改善
+   - コード品質向上
+
+### ❌ Cursorが行わない作業
+- 新規機能の初期実装（Claude Codeが担当）
+- ビジネスロジックの設計
+- 基本的なユニットテスト作成
+
+## テスト実装ルール
+
+### 受入テスト構造
+```typescript
+// tests/integration/auth.test.ts
+describe('認証フロー統合テスト', () => {
+  test('ログイン→ダッシュボード遷移', async () => {
+    // 実際のAPIを使用
+    // 複数コンポーネントの連携確認
+  });
+});
+
+E2Eテスト（Playwright）
+typescript// tests/e2e/user-journey.spec.ts
+test('ユーザージャーニー：データ登録→分析', async ({ page }) => {
+  await page.goto('/');
+  // 実際のユーザー操作をシミュレート
+});
+CI/CD設定
+yaml# .github/workflows/deploy.yml
+name: Deploy to AWS
+on:
+  push:
+    branches: [main]
+# Claudeが作成したコードを自動デプロイ
+## 品質保証プロセス
+
+Claude Codeの実装を受け取る
+統合テストを追加
+CI/CDパイプラインで自動化
+PlaywrightでUIテスト
+本番環境で最終確認
+
+##Claude Codeとの連携
+
+// TODO: Cursorコメントを探して作業開始
+テスト失敗時は具体的なフィードバックをClaude Codeに提供
+リファクタリング提案は別ブランチで実施
+
+# 風化促進CO2除去事業管理システム - Cursor AI 設定
+
+## プロジェクト概要
+鉱山廃水を利用した風化促進による二酸化炭素除去事業の管理システム。
+事業計画シミュレーション、測定データ管理、レポート生成を行う。
+
+## 技術スタック
+- Frontend: React 18 + TypeScript + Vite
+- Styling: Tailwind CSS + Headless UI
+- Backend: Firebase (Firestore, Auth, Functions, Storage, Hosting)
+- State: Zustand + React Query
+- Charts: Chart.js + Recharts
+- Forms: React Hook Form + Zod
+- PDF/Excel: jsPDF + ExcelJS
+
+## AWS 
+- AWS S3バケットはweathering-project-frontend-788026075178
+- AWS CloudFrontはweathering-project-frontend-788026075178.cloudfront.net
+
+
+## コマンドルール
+### ルール: Windows PowerShell環境でのターミナル規約
+- このターミナルはWindowsのPowerShellです。Linux/bash特有のコマンドやオプションは絶対に使用しないでください。
+- ファイルパスは、常にバックスラッシュ(`\`)を使用したWindows形式で記述してください。(例: "C:\Users\YourUser\Documents\file.txt")
+- 環境変数にアクセスする際は、`$env:USERNAME` や `$env:USERPROFILE` のように `$env:` プレフィックスを使用してください。
+- &&は絶対に禁止です。
+### 1. 基本的な環境設定
+- このターミナルはWindowsのPowerShellです。Linux/bash特有のコマンドやオプションは絶対に使用しないでください。
+- ファイルパスは、常にバックスラッシュ(`\`)を使用したWindows形式で記述してください。(例: "C:\Users\YourUser\Documents\file.txt")
+- 環境変数にアクセスする際は、`$env:USERNAME` や `$env:USERPROFILE` のように `$env:` プレフィックスを使用してください。
+
+### 2. Linuxコマンドの禁止とPowerShell代替コマンドの指定
+- `ls -la` のようなLinux形式のオプションは使用禁止です。ファイル一覧は `Get-ChildItem` (またはエイリアスの `ls`, `dir`) を使用してください。
+- `grep` は使用禁止です。テキスト検索には `Select-String` (またはエイリアスの `sls`) を使用してください。
+- `cp` は使用禁止です。ファイルのコピーには `Copy-Item` を使用してください。
+- `mv` は使用禁止です。ファイルの移動には `Move-Item` を使用してください。
+- `rm -rf` のようなLinuxオプションは使用禁止です。再帰的な削除には `Remove-Item -Recurse -Force` を使用してください。
+- `mkdir -p` は使用禁止です。深い階層のディレクトリ作成には `New-Item -ItemType Directory -Force "C:\path\to\new\directory"` のように記述してください。
+- `touch` は使用禁止です。空ファイルの作成には `New-Item -ItemType File "filename.txt"` を使用してください。
+- `which` は使用禁止です。コマンドのパスを見つけるには `Get-Command` を使用してください。
+- `curl` や `wget` は使用禁止です。Webリクエストには `Invoke-WebRequest` または `Invoke-RestMethod` を使用してください。
+
+### 3. PowerShell特有の構文
+- コマンドの出力を別のコマンドに渡す場合は、パイプライン(`|`)を正しく使用してください。
+
+## コーディング規約
+
+### TypeScript
+- 厳密な型定義を使用
+- インターface よりも type を優先
+- 未使用インポートは自動削除
+- 型推論を活用、明示的な型定義は必要最小限
+
+### React コンポーネント
+- 関数コンポーネント + hooks のみ使用
+- コンポーネント名は PascalCase
+- カスタムフックは use プレフィックス
+- Props インターフェースは ComponentProps 形式
+- デフォルトエクスポートを使用
+
+### インポートエラー防止ルール
+- **重要**: 共通コンポーネント（Button, Input, Card等）は必ずデフォルトインポートを使用すること
+- `import { Button } from '../common/button'` ❌ (エラーの原因)
+- `import Button from '../common/button'` ✅ (正しい方法)
+- 新しいコンポーネントを作成する前に、既存のエクスポート方法を確認すること
+
+### ファイル・ディレクトリ構成
+```
+src/
+├── components/
+│   ├── common/          # 再利用可能なUI
+│   ├── auth/            # 認証関連
+│   ├── dashboard/       # ダッシュボード・シミュレーション
+│   ├── projects/        # プロジェクト管理
+│   ├── measurements/    # 測定データ管理
+│   └── reports/         # レポート生成
+├── hooks/               # カスタムフック
+├── lib/                 # Firebase設定・外部ライブラリ設定
+├── stores/              # Zustand ストア
+├── types/               # TypeScript型定義
+├── utils/               # ユーティリティ関数
+└── pages/               # ページコンポーネント
+```
+
+### 命名規則
+- ファイル名: kebab-case (例: data-entry.tsx)
+- 変数・関数: camelCase
+- 定数: UPPER_SNAKE_CASE
+- CSS クラス: Tailwind 標準
+
+### Firebase 規約
+- コレクション名: 複数形・小文字 (例: projects, measurements)
+- ドキュメントID: 自動生成 (doc.id) 使用
+- サブコレクションよりフラット構造を優先
+- セキュリティルールは必須
+
+## 業務ドメイン知識
+
+### 風化促進プロセス
+1. 散布場設備建設・設置
+2. 散布材輸送 (採掘→粉砕→輸送)
+3. 散布実施
+4. 風化反応
+5. 効果測定
+6. 汚泥処理
+
+### 主要測定項目
+- CO2濃度 (ppm)
+- pH値 (6.0-8.0)
+- 流量 (m³/day)
+- 温度 (℃)
+- 重金属濃度 (mg/L)
+- 岩石散布量 (ton/month)
+
+### 計算式・業務ロジック
+- CO2除去量 = 散布量 × 反応効率 × 時間係数
+- 投資回収期間 = 初期投資 ÷ (年間収益 - 年間運用費)
+- pH緩衝能力 = アルカリ度 × 流量 × 反応時間
+
+### レポート種類
+- MRV報告書: 認証機関向け（測定・報告・検証）
+- 環境報告書: 行政向け（重金属・水質監視）
+
+## AI 支援指針
+
+### コード生成時の注意点
+- 必ず TypeScript で型安全なコードを生成
+- エラーハンドリングとローディング状態を含める
+- レスポンシブデザイン対応 (Tailwind CSS)
+- アクセシビリティ配慮 (aria-* 属性)
+- Firebase セキュリティルール考慮
+
+### コンポーネント設計
+- 単一責任原則
+- Props の型定義必須
+- 副作用は useEffect で適切に管理
+- カスタムフックで業務ロジック分離
+
+### 状態管理
+- グローバル状態: Zustand
+- サーバー状態: React Query
+- フォーム状態: React Hook Form
+- 必要以上の状態リフトアップを避ける
+
+### パフォーマンス
+- React.memo, useMemo, useCallback 適切に使用
+- 大きなリストは仮想化 (react-window)
+- 画像は lazy loading
+- バンドルサイズ監視
+
+### セキュリティ
+- 環境変数で機密情報管理
+- クライアントサイドでの機密データ避ける
+- Firestore ルールで認可制御
+- XSS 対策 (適切なエスケープ)
+
+## 特別な配慮事項
+
+### 鉱山事業者向け設計
+- 専門用語は日本語表記
+- 直感的な操作性重視
+- データ入力の効率化
+- オフライン耐性 (可能な範囲で)
+
+### 科学的精度
+- 計算精度と表示精度の使い分け
+- 単位系の統一 (SI単位基準)
+- 有効数字の適切な処理
+- データ品質管理
+
+### 規制対応
+- データ保存期間の管理
+- 監査証跡の確保
+- 個人情報保護対応
+- 国際基準準拠 (ISO 14064等)
+
+## 開発支援
+
+### Next.js静的サイトデプロイ
+**⚠️ 重要**: 静的サイト（output: 'export'）のAWSデプロイでは以下を厳守すること
+
+#### デプロイ対象フォルダの区別
+- ❌ **絶対に`.next`フォルダをS3にアップロードしてはいけない**
+  - `.next`はサーバー用ビルド成果物（JSON、Node.js向けファイル）
+  - CloudFrontで配信すると正常に動作しない
+- ✅ **必ず`out`フォルダをS3にアップロードすること**
+  - `out`は静的サイト用（HTML、CSS、JS）
+  - `npm run build`で`output: 'export'`設定により自動生成される
+
+#### 正しいデプロイ手順
+1. `cd test` (Next.jsプロジェクトディレクトリ)
+2. `npm run build` (ビルド実行、outフォルダ生成)
+3. `aws s3 sync out s3://weathering-project-frontend-788026075178` ✅
+4. `aws s3 sync .next s3://weathering-project-frontend-788026075178` ❌ (禁止)
+5. `aws cloudfront create-invalidation --distribution-id ERCBD6UW7KRBP --paths "/*"`
+
+#### デプロイ前確認事項
+- `test/out/index.html` が存在することを確認
+- `test/out/plan-actual/index.html` が存在することを確認
+- S3アップロード後、HTMLファイルが正しく配置されていることを確認
+- JSONファイルばかりの場合は間違いなので即座に修正
+
+#### デプロイ後の動作確認URL（CloudFront）
+https://dikwcz6haxnrb.cloudfront.net
+#### トラブルシューティング
+- 「JSONファイルばかり」→ `.next`を誤ってアップロードした証拠
+- 「404エラー」→ `index.html`が正しい場所にない
+- 「白い画面」→ JSファイルのパスが間違っている
+
+### デバッグ支援
+- console.log より console.group 使用
+- エラー境界コンポーネント実装
+- Firebase Emulator 活用
+- Cursor デバッガー活用
+
+### テスト戦略
+- 単体テスト: Jest + React Testing Library
+- E2E テスト: Playwright (必要に応じて)
+- Firebase Emulator でのテスト
+- カバレッジ 80% 以上目標
+
+### パッケージ管理
+- 依存関係は最小限に
+- セキュリティ脆弱性定期チェック
+- package.json scripts の整備
+- lock ファイルのコミット
+
+## AI との協働方針
+
+### 段階的な実装
+1. 最小機能 (MVP) から開始
+2. AI 提案を理解・検証してから採用
+3. ビジネスロジックは人間が主導
+4. UI/UX は AI と人間の協働
+
+### 学習重視
+- 生成コードの動作原理を理解
+- なぜそのアプローチなのかを確認
+- 代替案も検討
+- ベストプラクティスの学習
+
+### 品質維持
+- AI 生成コードも必ずレビュー
+- 段階的なリファクタリング
+- ドキュメント更新
+- テストコード充実
+
+この設定に基づいて、効率的で高品質な開発を支援してください。
+学習を重視し、理解を深めながら実装を進めてください。

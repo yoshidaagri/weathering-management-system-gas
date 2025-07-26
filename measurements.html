@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 測定データ管理</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-text {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .btn-outline-light {
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .page-title {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .control-section {
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 8px;
+            color: #2ecc71;
+        }
+        
+        .data-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        
+        .quality-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .quality-A { background: #d4edda; color: #155724; }
+        .quality-B { background: #d1ecf1; color: #0c5460; }
+        .quality-C { background: #fff3cd; color: #856404; }
+        .quality-D { background: #f8d7da; color: #721c24; }
+        
+        .alert-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin: 1px;
+            display: inline-block;
+        }
+        
+        .alert-HIGH { background: #f8d7da; color: #721c24; }
+        .alert-MEDIUM { background: #fff3cd; color: #856404; }
+        .alert-LOW { background: #d1ecf1; color: #0c5460; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 8px 16px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-primary {
+            border-color: #2ecc71;
+            color: #2ecc71;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 8px 12px;
+        }
+        
+        .form-control:focus {
+            border-color: #2ecc71;
+            box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stats-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2ecc71;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .page-link {
+            color: #2ecc71;
+            border-color: #2ecc71;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+        
+        .page-link:hover {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+            color: white;
+        }
+        
+        .page-item.active .page-link {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .table-responsive {
+            border-radius: 12px;
+        }
+        
+        .filter-pill {
+            background: #e9ecef;
+            color: #495057;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .filter-pill.active {
+            background: #2ecc71;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="?page=admin-dashboard">
+                <i class="fas fa-leaf"></i> <?= appName ?>
+            </a>
+            
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-shield"></i> <?= user.name || user.email ?>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ログアウト
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- ページヘッダー -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-flask"></i> 測定データ管理
+            </h1>
+            <p class="page-subtitle">
+                環境測定データの管理、分析、品質チェック機能
+            </p>
+        </div>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <!-- 統計サマリー -->
+        <div class="row" id="statsRow">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalMeasurements">-</div>
+                    <p class="stats-label">総測定数</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="averageQuality">-</div>
+                    <p class="stats-label">平均品質スコア</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalAlerts">-</div>
+                    <p class="stats-label">アラート数</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="todayMeasurements">-</div>
+                    <p class="stats-label">今日の測定</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- コントロールパネル -->
+        <div class="control-panel">
+            <!-- データ入力セクション -->
+            <div class="control-section">
+                <h5 class="section-title">
+                    <i class="fas fa-plus-circle"></i> 測定データ入力
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <select class="form-control" id="projectSelect">
+                            <option value="">プロジェクトを選択</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" id="measurementDate" 
+                               value="<?= new Date().toISOString().split('T')[0] ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="time" class="form-control" id="measurementTime" 
+                               value="<?= new Date().toTimeString().slice(0,5) ?>">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary btn-block" onclick="openAddMeasurementModal()">
+                            <i class="fas fa-plus"></i> 新規入力
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- フィルター・検索セクション -->
+            <div class="control-section">
+                <h5 class="section-title">
+                    <i class="fas fa-filter"></i> フィルター・検索
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterProject">
+                            <option value="">全プロジェクト</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="dateRange" placeholder="期間を選択">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" id="qualityFilter">
+                            <option value="">全品質</option>
+                            <option value="A">A (優秀)</option>
+                            <option value="B">B (良好)</option>
+                            <option value="C">C (要注意)</option>
+                            <option value="D">D (要改善)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" id="alertFilter">
+                            <option value="">全アラート</option>
+                            <option value="HIGH">高</option>
+                            <option value="MEDIUM">中</option>
+                            <option value="LOW">低</option>
+                            <option value="none">なし</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary btn-block" onclick="applyFilters()">
+                            <i class="fas fa-search"></i> 検索
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- アクションセクション -->
+            <div class="control-section">
+                <h5 class="section-title">
+                    <i class="fas fa-tools"></i> データ操作
+                </h5>
+                <div class="row">
+                    <div class="col-md-2">
+                        <button class="btn btn-success btn-block" onclick="exportData()">
+                            <i class="fas fa-file-export"></i> エクスポート
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-info btn-block" onclick="runQualityCheck()">
+                            <i class="fas fa-check-circle"></i> 品質チェック
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-warning btn-block" onclick="showAnalytics()">
+                            <i class="fas fa-chart-line"></i> 分析表示
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-secondary btn-block" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> 更新
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-danger btn-block" onclick="bulkDelete()">
+                            <i class="fas fa-trash-alt"></i> 一括削除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- データテーブル -->
+        <div class="data-table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="section-title mb-0">
+                    <i class="fas fa-table"></i> 測定データ一覧
+                </h5>
+                <div>
+                    <span id="dataCount" class="text-muted">0件のデータ</span>
+                </div>
+            </div>
+            
+            <!-- ローディングスピナー -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">読み込み中...</span>
+                </div>
+                <p class="mt-2">データを読み込んでいます...</p>
+            </div>
+            
+            <!-- データテーブル -->
+            <div class="table-responsive" id="dataTableContainer">
+                <table class="table table-hover" id="measurementsTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th>測定日時</th>
+                            <th>プロジェクト</th>
+                            <th>pH値</th>
+                            <th>CO2濃度<br><small class="text-muted">(ppm)</small></th>
+                            <th>温度<br><small class="text-muted">(°C)</small></th>
+                            <th>流量<br><small class="text-muted">(L/min)</small></th>
+                            <th>CO2除去量<br><small class="text-muted">(kg)</small></th>
+                            <th>効率<br><small class="text-muted">(%)</small></th>
+                            <th>品質</th>
+                            <th>アラート</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="measurementsTableBody">
+                        <!-- データはJavaScriptで動的に挿入 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 空状態 -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-database"></i>
+                <h5>データが見つかりません</h5>
+                <p>選択した条件に一致する測定データがありません。<br>フィルター条件を変更するか、新しいデータを入力してください。</p>
+            </div>
+            
+            <!-- ページネーション -->
+            <nav aria-label="データページネーション">
+                <ul class="pagination" id="pagination">
+                    <!-- ページネーションはJavaScriptで生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- 測定データ入力モーダル -->
+    <div class="modal fade" id="addMeasurementModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle"></i> 測定データ入力
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="measurementForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="modalProjectSelect">プロジェクト <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="modalProjectSelect" required>
+                                        <option value="">プロジェクトを選択</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalMeasurementDate">測定日 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="modalMeasurementDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalMeasurementTime">測定時刻 <span class="text-danger">*</span></label>
+                                    <input type="time" class="form-control" id="modalMeasurementTime" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalPH">pH値</label>
+                                    <input type="number" class="form-control" id="modalPH" 
+                                           step="0.1" min="0" max="14" placeholder="7.0">
+                                    <small class="form-text text-muted">0-14の範囲</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalCO2Concentration">CO2濃度 (ppm)</label>
+                                    <input type="number" class="form-control" id="modalCO2Concentration" 
+                                           step="0.1" min="0" placeholder="400">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalTemperature">温度 (°C)</label>
+                                    <input type="number" class="form-control" id="modalTemperature" 
+                                           step="0.1" placeholder="20.0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="modalFlowRate">流量 (L/min)</label>
+                                    <input type="number" class="form-control" id="modalFlowRate" 
+                                           step="0.1" min="0" placeholder="100">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="modalRockDispersalAmount">岩石分散量 (kg)</label>
+                                    <input type="number" class="form-control" id="modalRockDispersalAmount" 
+                                           step="0.1" min="0" placeholder="1000">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="modalCO2RemovalAmount">CO2除去量 (kg)</label>
+                                    <input type="number" class="form-control" id="modalCO2RemovalAmount" 
+                                           step="0.01" min="0" placeholder="50.0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="modalLocation">測定場所</label>
+                                    <input type="text" class="form-control" id="modalLocation" 
+                                           placeholder="測定ポイント名">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modalNotes">備考</label>
+                            <textarea class="form-control" id="modalNotes" rows="3" 
+                                      placeholder="特記事項があれば記入してください"></textarea>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modalAutoQualityCheck" checked>
+                            <label class="form-check-label" for="modalAutoQualityCheck">
+                                自動品質チェックを実行
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> キャンセル
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveMeasurement()">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    
+    <script>
+        let measurementsData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 20;
+        let projects = [];
+        
+        // ページ初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+        
+        function initializePage() {
+            console.log('測定データ管理画面を初期化中...');
+            
+            // 日付範囲ピッカーの初期化
+            initializeDateRangePicker();
+            
+            // プロジェクトデータを読み込み
+            loadProjects();
+            
+            // 測定データを読み込み
+            loadMeasurements();
+            
+            // モーダルの日時を現在時刻に設定
+            setCurrentDateTime();
+        }
+        
+        function initializeDateRangePicker() {
+            $('#dateRange').daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'クリア',
+                    applyLabel: '適用',
+                    fromLabel: '開始',
+                    toLabel: '終了',
+                    customRangeLabel: 'カスタム',
+                    weekLabel: 'W',
+                    daysOfWeek: ['日', '月', '火', '水', '木', '金', '土'],
+                    monthNames: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                },
+                ranges: {
+                    '今日': [moment(), moment()],
+                    '昨日': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '過去7日': [moment().subtract(6, 'days'), moment()],
+                    '過去30日': [moment().subtract(29, 'days'), moment()],
+                    '今月': [moment().startOf('month'), moment().endOf('month')],
+                    '先月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            });
+            
+            $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY/MM/DD') + ' - ' + picker.endDate.format('YYYY/MM/DD'));
+            });
+            
+            $('#dateRange').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+        }
+        
+        function loadProjects() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        projects = result.data;
+                        populateProjectSelects();
+                    } else {
+                        console.error('プロジェクト読み込みエラー:', result.message);
+                        showAlert('プロジェクトの読み込みに失敗しました', 'warning');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('プロジェクト読み込み失敗:', error);
+                    showAlert('プロジェクトデータの取得中にエラーが発生しました', 'danger');
+                })
+                .loadProjectsData();
+        }
+        
+        function populateProjectSelects() {
+            const selects = ['#projectSelect', '#filterProject', '#modalProjectSelect'];
+            
+            selects.forEach(selector => {
+                const select = $(selector);
+                const currentValue = select.val();
+                
+                // 最初のオプション以外をクリア
+                select.find('option:not(:first)').remove();
+                
+                // プロジェクトオプションを追加
+                projects.forEach(project => {
+                    const option = $('<option>', {
+                        value: project.projectId,
+                        text: `${project.projectName} (${project.customerName})`
+                    });
+                    select.append(option);
+                });
+                
+                // 前の値があれば復元
+                if (currentValue) {
+                    select.val(currentValue);
+                }
+            });
+        }
+        
+        function loadMeasurements() {
+            showLoading(true);
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        measurementsData = result.data;
+                        filteredData = [...measurementsData];
+                        updateStatistics();
+                        renderTable();
+                        updatePagination();
+                    } else {
+                        console.error('測定データ読み込みエラー:', result.message);
+                        showAlert('測定データの読み込みに失敗しました', 'warning');
+                        measurementsData = [];
+                        filteredData = [];
+                        showEmptyState();
+                    }
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('測定データ読み込み失敗:', error);
+                    showAlert('測定データの取得中にエラーが発生しました', 'danger');
+                    measurementsData = [];
+                    filteredData = [];
+                    showEmptyState();
+                    showLoading(false);
+                })
+                .loadMeasurementsData();
+        }
+        
+        function updateStatistics() {
+            const totalMeasurements = measurementsData.length;
+            
+            // 品質スコアの平均
+            const qualityScores = measurementsData
+                .filter(m => m.qualityCheck && m.qualityCheck.score !== undefined)
+                .map(m => m.qualityCheck.score);
+            const averageQuality = qualityScores.length > 0 ? 
+                Math.round(qualityScores.reduce((sum, score) => sum + score, 0) / qualityScores.length) : 0;
+            
+            // アラート数
+            const totalAlerts = measurementsData
+                .filter(m => m.qualityCheck && m.qualityCheck.alerts && m.qualityCheck.alerts.length > 0)
+                .reduce((sum, m) => sum + m.qualityCheck.alerts.length, 0);
+            
+            // 今日の測定数
+            const today = new Date().toISOString().split('T')[0];
+            const todayMeasurements = measurementsData
+                .filter(m => m.measurementDate && m.measurementDate.startsWith(today))
+                .length;
+            
+            // 統計を更新
+            $('#totalMeasurements').text(totalMeasurements.toLocaleString());
+            $('#averageQuality').text(averageQuality);
+            $('#totalAlerts').text(totalAlerts.toLocaleString());
+            $('#todayMeasurements').text(todayMeasurements.toLocaleString());
+        }
+        
+        function renderTable() {
+            const tbody = $('#measurementsTableBody');
+            tbody.empty();
+            
+            if (filteredData.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            hideEmptyState();
+            
+            // ページネーション用のデータを取得
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            pageData.forEach(measurement => {
+                const row = createTableRow(measurement);
+                tbody.append(row);
+            });
+            
+            // データ件数を更新
+            $('#dataCount').text(`${filteredData.length}件のデータ`);
+        }
+        
+        function createTableRow(measurement) {
+            const row = $('<tr>');
+            
+            // チェックボックス
+            row.append(`<td><input type="checkbox" class="row-checkbox" value="${measurement.measurementId}"></td>`);
+            
+            // 測定日時
+            const measurementDateTime = formatDateTime(measurement.measurementDate, measurement.measurementTime);
+            row.append(`<td>${measurementDateTime}</td>`);
+            
+            // プロジェクト名
+            const project = projects.find(p => p.projectId === measurement.projectId);
+            const projectName = project ? project.projectName : measurement.projectId;
+            row.append(`<td>${projectName}</td>`);
+            
+            // 測定値
+            row.append(`<td>${formatValue(measurement.pH, 1)}</td>`);
+            row.append(`<td>${formatValue(measurement.co2Concentration, 1)}</td>`);
+            row.append(`<td>${formatValue(measurement.temperature, 1)}</td>`);
+            row.append(`<td>${formatValue(measurement.flowRate, 1)}</td>`);
+            row.append(`<td>${formatValue(measurement.co2RemovalAmount, 2)}</td>`);
+            row.append(`<td>${formatValue(measurement.efficiency, 1)}%</td>`);
+            
+            // 品質バッジ
+            const qualityBadge = createQualityBadge(measurement.qualityCheck);
+            row.append(`<td>${qualityBadge}</td>`);
+            
+            // アラートバッジ
+            const alertBadges = createAlertBadges(measurement.qualityCheck);
+            row.append(`<td>${alertBadges}</td>`);
+            
+            // 操作ボタン
+            const actions = `
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editMeasurement('${measurement.measurementId}')" 
+                            title="編集">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="viewMeasurement('${measurement.measurementId}')" 
+                            title="詳細">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMeasurement('${measurement.measurementId}')" 
+                            title="削除">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            row.append(`<td>${actions}</td>`);
+            
+            return row;
+        }
+        
+        function formatDateTime(date, time) {
+            if (!date) return '-';
+            
+            const d = new Date(date);
+            const formattedDate = d.toLocaleDateString('ja-JP');
+            const formattedTime = time || '';
+            
+            return formattedTime ? `${formattedDate} ${formattedTime}` : formattedDate;
+        }
+        
+        function formatValue(value, decimals = 1) {
+            if (value === null || value === undefined || value === '') return '-';
+            
+            const num = parseFloat(value);
+            return isNaN(num) ? '-' : num.toFixed(decimals);
+        }
+        
+        function createQualityBadge(qualityCheck) {
+            if (!qualityCheck || !qualityCheck.grade) {
+                return '<span class="quality-badge quality-D">未評価</span>';
+            }
+            
+            const grade = qualityCheck.grade;
+            const score = qualityCheck.score || 0;
+            
+            return `<span class="quality-badge quality-${grade}">${grade} (${score})</span>`;
+        }
+        
+        function createAlertBadges(qualityCheck) {
+            if (!qualityCheck || !qualityCheck.alerts || qualityCheck.alerts.length === 0) {
+                return '<span class="text-muted">なし</span>';
+            }
+            
+            return qualityCheck.alerts.map(alert => 
+                `<span class="alert-badge alert-${alert.severity}">${alert.type}</span>`
+            ).join(' ');
+        }
+        
+        function updatePagination() {
+            const pagination = $('#pagination');
+            pagination.empty();
+            
+            if (filteredData.length === 0) return;
+            
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            if (totalPages <= 1) return;
+            
+            // 前のページ
+            if (currentPage > 1) {
+                pagination.append(createPageItem(currentPage - 1, '前へ'));
+            }
+            
+            // ページ番号
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                    pagination.append(createPageItem(i, i, i === currentPage));
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                }
+            }
+            
+            // 次のページ
+            if (currentPage < totalPages) {
+                pagination.append(createPageItem(currentPage + 1, '次へ'));
+            }
+        }
+        
+        function createPageItem(page, text, isActive = false) {
+            const activeClass = isActive ? 'active' : '';
+            return `
+                <li class="page-item ${activeClass}">
+                    <button class="page-link" onclick="changePage(${page})">${text}</button>
+                </li>
+            `;
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderTable();
+            updatePagination();
+        }
+        
+        function showLoading(show) {
+            if (show) {
+                $('#loadingSpinner').show();
+                $('#dataTableContainer').hide();
+                $('#emptyState').hide();
+            } else {
+                $('#loadingSpinner').hide();
+                $('#dataTableContainer').show();
+            }
+        }
+        
+        function showEmptyState() {
+            $('#dataTableContainer').hide();
+            $('#emptyState').show();
+        }
+        
+        function hideEmptyState() {
+            $('#emptyState').hide();
+            $('#dataTableContainer').show();
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            $('.container').first().prepend(alertHtml);
+            
+            // 5秒後に自動削除
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+        
+        // イベントハンドラー
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                window.location.href = '?';
+            }
+        }
+        
+        function refreshData() {
+            loadMeasurements();
+        }
+        
+        function applyFilters() {
+            filteredData = [...measurementsData];
+            
+            // プロジェクトフィルター
+            const projectFilter = $('#filterProject').val();
+            if (projectFilter) {
+                filteredData = filteredData.filter(m => m.projectId === projectFilter);
+            }
+            
+            // 期間フィルター
+            const dateRange = $('#dateRange').val();
+            if (dateRange) {
+                const [startDate, endDate] = dateRange.split(' - ').map(d => new Date(d));
+                filteredData = filteredData.filter(m => {
+                    const measurementDate = new Date(m.measurementDate);
+                    return measurementDate >= startDate && measurementDate <= endDate;
+                });
+            }
+            
+            // 品質フィルター
+            const qualityFilter = $('#qualityFilter').val();
+            if (qualityFilter) {
+                filteredData = filteredData.filter(m => 
+                    m.qualityCheck && m.qualityCheck.grade === qualityFilter
+                );
+            }
+            
+            // アラートフィルター
+            const alertFilter = $('#alertFilter').val();
+            if (alertFilter) {
+                if (alertFilter === 'none') {
+                    filteredData = filteredData.filter(m => 
+                        !m.qualityCheck || !m.qualityCheck.alerts || m.qualityCheck.alerts.length === 0
+                    );
+                } else {
+                    filteredData = filteredData.filter(m => 
+                        m.qualityCheck && m.qualityCheck.alerts && 
+                        m.qualityCheck.alerts.some(alert => alert.severity === alertFilter)
+                    );
+                }
+            }
+            
+            currentPage = 1;
+            renderTable();
+            updatePagination();
+            
+            showAlert(`${filteredData.length}件のデータが見つかりました`, 'success');
+        }
+        
+        function openAddMeasurementModal() {
+            setCurrentDateTime();
+            $('#measurementForm')[0].reset();
+            $('#addMeasurementModal').modal('show');
+        }
+        
+        function setCurrentDateTime() {
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toTimeString().slice(0, 5);
+            
+            $('#measurementDate').val(date);
+            $('#measurementTime').val(time);
+            $('#modalMeasurementDate').val(date);
+            $('#modalMeasurementTime').val(time);
+        }
+        
+        function saveMeasurement() {
+            const formData = {
+                projectId: $('#modalProjectSelect').val(),
+                measurementDate: $('#modalMeasurementDate').val(),
+                measurementTime: $('#modalMeasurementTime').val(),
+                pH: $('#modalPH').val(),
+                co2Concentration: $('#modalCO2Concentration').val(),
+                temperature: $('#modalTemperature').val(),
+                flowRate: $('#modalFlowRate').val(),
+                rockDispersalAmount: $('#modalRockDispersalAmount').val(),
+                co2RemovalAmount: $('#modalCO2RemovalAmount').val(),
+                location: $('#modalLocation').val(),
+                notes: $('#modalNotes').val(),
+                autoQualityCheck: $('#modalAutoQualityCheck').prop('checked')
+            };
+            
+            // バリデーション
+            if (!formData.projectId) {
+                showAlert('プロジェクトを選択してください', 'warning');
+                return;
+            }
+            
+            if (!formData.measurementDate) {
+                showAlert('測定日を入力してください', 'warning');
+                return;
+            }
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        $('#addMeasurementModal').modal('hide');
+                        showAlert('測定データを保存しました', 'success');
+                        loadMeasurements(); // データを再読み込み
+                    } else {
+                        showAlert('測定データの保存に失敗しました: ' + result.message, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showAlert('測定データの保存中にエラーが発生しました', 'danger');
+                    console.error('Save measurement error:', error);
+                })
+                .createMeasurementData(formData);
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = $('#selectAll').prop('checked');
+            $('.row-checkbox').prop('checked', selectAll);
+        }
+        
+        function editMeasurement(measurementId) {
+            alert('測定データ編集機能は実装中です。測定ID: ' + measurementId);
+        }
+        
+        function viewMeasurement(measurementId) {
+            const measurement = measurementsData.find(m => m.measurementId === measurementId);
+            if (measurement) {
+                const details = JSON.stringify(measurement, null, 2);
+                alert('測定データ詳細:\n' + details);
+            }
+        }
+        
+        function deleteMeasurement(measurementId) {
+            if (confirm('この測定データを削除しますか？')) {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result.success) {
+                            showAlert('測定データを削除しました', 'success');
+                            loadMeasurements();
+                        } else {
+                            showAlert('測定データの削除に失敗しました: ' + result.message, 'danger');
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        showAlert('測定データの削除中にエラーが発生しました', 'danger');
+                        console.error('Delete measurement error:', error);
+                    })
+                    .deleteMeasurementData(measurementId);
+            }
+        }
+        
+        function bulkDelete() {
+            const selectedIds = $('.row-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            if (selectedIds.length === 0) {
+                showAlert('削除するデータを選択してください', 'warning');
+                return;
+            }
+            
+            if (confirm(`選択した${selectedIds.length}件のデータを削除しますか？`)) {
+                // 一括削除の実装（実際のAPIに依存）
+                alert('一括削除機能は実装中です');
+            }
+        }
+        
+        function exportData() {
+            alert('データエクスポート機能は実装中です');
+        }
+        
+        function runQualityCheck() {
+            showAlert('品質チェックを実行中...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        showAlert('品質チェックが完了しました', 'success');
+                        loadMeasurements(); // データを再読み込み
+                    } else {
+                        showAlert('品質チェックに失敗しました: ' + result.message, 'danger');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showAlert('品質チェック中にエラーが発生しました', 'danger');
+                    console.error('Quality check error:', error);
+                })
+                .runMeasurementsQualityCheck();
+        }
+        
+        function showAnalytics() {
+            window.open('?page=analytics', '_blank');
+        }
+    </script>
+</body>
+</html>

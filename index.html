@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>
+  </head>
+  <body>
+    <h1>風化促進CO2除去管理システム</h1>
+    <p>測定データ管理と分析機能を提供します</p>
+    
+    <div class="navigation">
+      <a href="<?= getAppUrl() ?>?page=viewer">ビューアー機能</a>
+      <a href="<?= getAppUrl() ?>?page=data-simple">測定データ管理</a>
+      <a href="<?= getAppUrl() ?>?page=analysis-simple">データ分析</a>
+      <a href="<?= getAppUrl() ?>?page=admin-login">管理者ログイン</a>
+      <a href="<?= getAppUrl() ?>?page=customer-login">顧客ログイン</a>
+      <a href="<?= getAppUrl() ?>?page=index">ホーム</a>
+    </div>
+    
+    <div class="content">
+      <h2>システム機能</h2>
+      <div class="stat-cards">
+        <div class="stat-card">
+          <h3>📊</h3>
+          <p><strong>ビューアー</strong><br>基本的なデータ表示機能</p>
+        </div>
+        <div class="stat-card">
+          <h3>📝</h3>
+          <p><strong>測定データ管理</strong><br>CO2測定データの登録・管理</p>
+        </div>
+        <div class="stat-card">
+          <h3>📈</h3>
+          <p><strong>データ分析</strong><br>測定データの分析・可視化</p>
+        </div>
+      </div>
+      
+      <div class="alert info">
+        <strong>Phase 3 対応完了！</strong><br>
+        シンプルで直感的な画面遷移システムにより、測定データ管理と分析機能にアクセスできます。
+      </div>
+      
+      <h2>機能概要</h2>
+      <ul>
+        <li><strong>ビューアー機能</strong>: システムの基本的なデータ表示とナビゲーション</li>
+        <li><strong>測定データ管理</strong>: pH値、CO2濃度、温度、流量等の測定データを登録・管理</li>
+        <li><strong>データ分析</strong>: CO2除去効率の分析、トレンド分析、統計情報の表示</li>
+        <li><strong>レスポンシブ対応</strong>: モバイル・PC両方で快適に操作可能</li>
+      </ul>
+      
+      <div class="button-group">
+        <button onclick="location.href='<?= getAppUrl() ?>?page=data-simple'">測定データ管理を開始</button>
+        <button onclick="location.href='<?= getAppUrl() ?>?page=analysis-simple'">データ分析を開始</button>
+      </div>
+      
+      <h2>ログイン・認証</h2>
+      <div class="auth-section">
+        <div class="stat-card">
+          <h3>👨‍💼</h3>
+          <p><strong>管理者ログイン</strong><br>システム全体の管理機能にアクセス</p>
+          <button onclick="location.href='<?= getAppUrl() ?>?page=admin-login'">管理者としてログイン</button>
+        </div>
+        <div class="stat-card">
+          <h3>🏢</h3>
+          <p><strong>顧客ログイン</strong><br>自社データの閲覧・確認機能</p>
+          <button onclick="location.href='<?= getAppUrl() ?>?page=customer-login'">顧客としてログイン</button>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      console.log('風化促進CO2除去管理システム - Phase 3 対応版');
+      console.log('シンプル画面遷移システム統合完了');
+      
+      // エラー耐性のための基本的なエラーハンドリング
+      window.addEventListener('error', function(e) {
+        console.error('JavaScript エラー:', e.error);
+        return true; // エラーを隠すことで画面の表示を継続
+      });
+    </script>
+  </body>
+</html>

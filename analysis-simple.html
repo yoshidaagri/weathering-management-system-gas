@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>
+  </head>
+  <body>
+    <h1>データ分析</h1>
+    <p>CO2除去効率と環境データの分析結果を表示します</p>
+    
+    <div class="navigation">
+      <a href="<?= getAppUrl() ?>?page=index">ホーム</a>
+      <a href="<?= getAppUrl() ?>?page=viewer">ビューアー</a>
+      <a href="<?= getAppUrl() ?>?page=data-simple">測定データ</a>
+    </div>
+    
+    <div class="content">
+      <!-- 分析サマリー -->
+      <div class="stat-cards">
+        <div class="stat-card">
+          <h3 id="totalCO2Removal">1,245.8</h3>
+          <p>総CO2除去量 (kg)</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="efficiency">87.3</h3>
+          <p>除去効率 (%)</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avgEffectiveness">92.1</h3>
+          <p>平均有効性 (%)</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="projectCount">3</h3>
+          <p>分析対象プロジェクト数</p>
+        </div>
+      </div>
+      
+      <!-- アラート表示エリア -->
+      <div id="alertArea" style="display: none;"></div>
+      
+      <!-- 分析期間選択 -->
+      <div class="form-simple">
+        <h3>分析期間・設定</h3>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+          <div style="flex: 1; min-width: 150px;">
+            <label for="startDate">開始日:</label>
+            <input type="date" id="startDate" name="startDate">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label for="endDate">終了日:</label>
+            <input type="date" id="endDate" name="endDate">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label for="projectFilter">プロジェクト:</label>
+            <select id="projectFilter" name="projectFilter">
+              <option value="all">全プロジェクト</option>
+              <option value="project-001">山田鉱業 CO2除去</option>
+              <option value="project-002">田中鉱山 廃水処理</option>
+              <option value="project-003">佐藤工業 環境改善</option>
+            </select>
+          </div>
+          <div>
+            <button onclick="updateAnalysis()">分析を更新</button>
+            <button onclick="exportAnalysis()" class="secondary">レポート出力</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CO2濃度推移チャート -->
+      <div class="chart-container">
+        <canvas id="co2Chart"></canvas>
+      </div>
+      
+      <!-- 除去効率チャート -->
+      <div class="chart-container">
+        <canvas id="efficiencyChart"></canvas>
+      </div>
+      
+      <!-- プロジェクト別比較チャート -->
+      <div class="chart-container">
+        <canvas id="projectComparisonChart"></canvas>
+      </div>
+      
+      <!-- 詳細分析結果 -->
+      <div class="data-table">
+        <h3>詳細分析結果</h3>
+        <div class="button-group">
+          <button onclick="generateReport()">詳細レポート生成</button>
+          <button onclick="showTrendAnalysis()" class="secondary">トレンド分析</button>
+          <button onclick="showEfficiencyBreakdown()" class="secondary">効率内訳</button>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>期間</th>
+              <th>プロジェクト</th>
+              <th>測定回数</th>
+              <th>平均CO2濃度 (ppm)</th>
+              <th>CO2除去量 (kg)</th>
+              <th>除去効率 (%)</th>
+              <th>評価</th>
+            </tr>
+          </thead>
+          <tbody id="analysisTableBody">
+            <!-- JavaScriptで動的生成 -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 推奨事項 -->
+      <div class="alert info">
+        <h4>🔍 分析結果に基づく推奨事項</h4>
+        <ul id="recommendations">
+          <li>山田鉱業プロジェクトは除去効率が高く、継続的な運用が推奨されます</li>
+          <li>田中鉱山プロジェクトではpH値の調整により効率改善が期待できます</li>
+          <li>佐藤工業プロジェクトは安定した成果を示しており、拡張を検討できます</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+      console.log('データ分析画面 - Phase 3 シンプル版');
+      
+      // サンプル分析データ
+      const analysisData = {
+        timeSeriesData: {
+          labels: ['2024-12-15', '2024-12-16', '2024-12-17', '2024-12-18', '2024-12-19'],
+          co2Levels: [425.3, 445.8, 398.1, 523.7, 450.2],
+          efficiency: [85.2, 87.4, 92.1, 78.3, 88.9]
+        },
+        projectData: {
+          labels: ['山田鉱業', '田中鉱山', '佐藤工業'],
+          co2Removal: [456.8, 523.2, 398.7],
+          efficiency: [88.9, 78.3, 92.1],
+          colors: ['#4CAF50', '#FF9800', '#2196F3']
+        },
+        summaryData: [
+          {
+            period: '2024-12-15〜12-19',
+            project: '山田鉱業 CO2除去',
+            measurements: 15,
+            avgCO2: 445.8,
+            removal: 456.8,
+            efficiency: 88.9,
+            rating: '優秀'
+          },
+          {
+            period: '2024-12-15〜12-19',
+            project: '田中鉱山 廃水処理',
+            measurements: 12,
+            avgCO2: 498.3,
+            removal: 523.2,
+            efficiency: 78.3,
+            rating: '良好'
+          },
+          {
+            period: '2024-12-15〜12-19',
+            project: '佐藤工業 環境改善',
+            measurements: 10,
+            avgCO2: 412.5,
+            removal: 398.7,
+            efficiency: 92.1,
+            rating: '優秀'
+          }
+        ]
+      };
+      
+      let co2Chart, efficiencyChart, projectChart;
+      
+      // 初期化
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeDateRange();
+        initializeCharts();
+        loadAnalysisData();
+      });
+      
+      // 日付範囲の初期化
+      function initializeDateRange() {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 7); // 1週間前
+        
+        document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+      }
+      
+      // チャート初期化
+      function initializeCharts() {
+        // CO2濃度推移チャート
+        const co2Ctx = document.getElementById('co2Chart').getContext('2d');
+        co2Chart = new Chart(co2Ctx, {
+          type: 'line',
+          data: {
+            labels: analysisData.timeSeriesData.labels,
+            datasets: [{
+              label: 'CO2濃度 (ppm)',
+              data: analysisData.timeSeriesData.co2Levels,
+              borderColor: '#4CAF50',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'CO2濃度推移'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'CO2濃度 (ppm)'
+                }
+              }
+            }
+          }
+        });
+        
+        // 除去効率チャート
+        const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+        efficiencyChart = new Chart(efficiencyCtx, {
+          type: 'bar',
+          data: {
+            labels: analysisData.timeSeriesData.labels,
+            datasets: [{
+              label: '除去効率 (%)',
+              data: analysisData.timeSeriesData.efficiency,
+              backgroundColor: 'rgba(33, 150, 243, 0.8)',
+              borderColor: '#2196F3',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'CO2除去効率推移'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                  display: true,
+                  text: '除去効率 (%)'
+                }
+              }
+            }
+          }
+        });
+        
+        // プロジェクト別比較チャート
+        const projectCtx = document.getElementById('projectComparisonChart').getContext('2d');
+        projectChart = new Chart(projectCtx, {
+          type: 'doughnut',
+          data: {
+            labels: analysisData.projectData.labels,
+            datasets: [{
+              label: 'CO2除去量 (kg)',
+              data: analysisData.projectData.co2Removal,
+              backgroundColor: analysisData.projectData.colors,
+              borderWidth: 2,
+              borderColor: '#fff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'プロジェクト別CO2除去量比較'
+              },
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+      
+      // 分析データ読み込み
+      function loadAnalysisData() {
+        const tbody = document.getElementById('analysisTableBody');
+        
+        tbody.innerHTML = analysisData.summaryData.map(item => `
+          <tr>
+            <td>${item.period}</td>
+            <td>${item.project}</td>
+            <td>${item.measurements}</td>
+            <td>${item.avgCO2}</td>
+            <td>${item.removal}</td>
+            <td>${item.efficiency}</td>
+            <td>
+              <span style="padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; 
+                     background-color: ${item.rating === '優秀' ? '#d4edda' : '#fff3cd'}; 
+                     color: ${item.rating === '優秀' ? '#155724' : '#856404'};">
+                ${item.rating}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+      
+      // 分析更新
+      function updateAnalysis() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const project = document.getElementById('projectFilter').value;
+        
+        if (!startDate || !endDate) {
+          showAlert('warning', '開始日と終了日を選択してください。');
+          return;
+        }
+        
+        if (new Date(startDate) > new Date(endDate)) {
+          showAlert('error', '開始日は終了日より前の日付を選択してください。');
+          return;
+        }
+        
+        // 実際の実装では、ここでGoogle Sheetsからデータを取得
+        showAlert('info', `期間: ${startDate} 〜 ${endDate}<br>対象: ${project === 'all' ? '全プロジェクト' : document.getElementById('projectFilter').selectedOptions[0].text}<br>分析を更新しました。`);
+        
+        // チャートデータを更新（デモ用）
+        updateChartData();
+      }
+      
+      // チャートデータ更新
+      function updateChartData() {
+        // CO2濃度データの更新（ランダム生成でデモ）
+        const newCO2Data = Array.from({length: 5}, () => 
+          Math.round((Math.random() * 200 + 350) * 10) / 10
+        );
+        const newEfficiencyData = Array.from({length: 5}, () => 
+          Math.round((Math.random() * 25 + 75) * 10) / 10
+        );
+        
+        co2Chart.data.datasets[0].data = newCO2Data;
+        co2Chart.update();
+        
+        efficiencyChart.data.datasets[0].data = newEfficiencyData;
+        efficiencyChart.update();
+        
+        // 統計値更新
+        const avgCO2 = (newCO2Data.reduce((a, b) => a + b, 0) / newCO2Data.length).toFixed(1);
+        const avgEff = (newEfficiencyData.reduce((a, b) => a + b, 0) / newEfficiencyData.length).toFixed(1);
+        
+        document.getElementById('efficiency').textContent = avgEff;
+        showAlert('success', '分析データが更新されました。');
+      }
+      
+      // レポート生成
+      function generateReport() {
+        showAlert('info', '詳細レポートを生成しています...');
+        
+        setTimeout(() => {
+          const reportData = {
+            generatedAt: new Date().toLocaleString('ja-JP'),
+            period: `${document.getElementById('startDate').value} 〜 ${document.getElementById('endDate').value}`,
+            summary: analysisData.summaryData,
+            recommendations: [
+              '山田鉱業プロジェクト: 除去効率88.9%と高水準。現行設定での継続運用を推奨',
+              '田中鉱山プロジェクト: pH値調整により効率向上の余地あり。最適化により85%以上達成可能',
+              '佐藤工業プロジェクト: 安定した高効率(92.1%)。処理規模拡大を検討可能'
+            ]
+          };
+          
+          console.log('生成されたレポート:', reportData);
+          showAlert('success', '詳細レポートが生成されました。コンソールで確認できます。');
+        }, 1500);
+      }
+      
+      // トレンド分析表示
+      function showTrendAnalysis() {
+        const trends = [
+          'CO2濃度: 過去5日間で平均448.8ppm、安定した測定値',
+          '除去効率: 平均86.4%、最高92.1%（12/17）、最低78.3%（12/18）',
+          '季節要因: 冬季における安定した処理性能を確認',
+          '予測: 現行トレンドが継続すれば月間CO2除去量1.8トン達成見込み'
+        ];
+        
+        showAlert('info', '<strong>トレンド分析結果:</strong><br>' + trends.map(t => '• ' + t).join('<br>'));
+      }
+      
+      // 効率内訳表示
+      function showEfficiencyBreakdown() {
+        const breakdown = [
+          '物理的除去: 65.2% - 岩石散布による直接的CO2吸収',
+          '化学的除去: 22.1% - pH調整による溶解度向上効果',
+          '生物学的除去: 8.9% - 微生物活動による間接的効果',
+          'その他要因: 3.8% - 温度・流量等の環境要因'
+        ];
+        
+        showAlert('info', '<strong>除去効率内訳:</strong><br>' + breakdown.map(b => '• ' + b).join('<br>'));
+      }
+      
+      // 分析結果エクスポート
+      function exportAnalysis() {
+        const analysisReport = [
+          ['分析期間', document.getElementById('startDate').value + ' 〜 ' + document.getElementById('endDate').value],
+          ['生成日時', new Date().toLocaleString('ja-JP')],
+          [''],
+          ['プロジェクト名', '測定回数', '平均CO2濃度(ppm)', 'CO2除去量(kg)', '除去効率(%)', '評価'],
+          ...analysisData.summaryData.map(item => [
+            item.project, item.measurements, item.avgCO2, item.removal, item.efficiency, item.rating
+          ]),
+          [''],
+          ['推奨事項'],
+          ['1. 山田鉱業プロジェクトは高効率で継続運用推奨'],
+          ['2. 田中鉱山プロジェクトはpH最適化で効率向上可能'],
+          ['3. 佐藤工業プロジェクトは処理規模拡大を検討可能']
+        ];
+        
+        const csvContent = analysisReport.map(row => 
+          row.map(cell => `"${cell}"`).join(',')
+        ).join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `analysis_report_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        showAlert('success', '分析レポートをダウンロードしました。');
+      }
+      
+      // アラート表示
+      function showAlert(type, message) {
+        const alertArea = document.getElementById('alertArea');
+        alertArea.innerHTML = `<div class="alert ${type}">${message}</div>`;
+        alertArea.style.display = 'block';
+        
+        // 5秒後に自動で非表示
+        setTimeout(() => {
+          alertArea.style.display = 'none';
+        }, 5000);
+      }
+      
+      // エラーハンドリング
+      window.addEventListener('error', function(e) {
+        console.error('JavaScript エラー:', e.error);
+        showAlert('error', 'システムエラーが発生しました。ページを再読み込みしてください。');
+        return true;
+      });
+      
+      // ウィンドウリサイズ時のチャート調整
+      window.addEventListener('resize', function() {
+        if (co2Chart) co2Chart.resize();
+        if (efficiencyChart) efficiencyChart.resize();
+        if (projectChart) projectChart.resize();
+      });
+    </script>
+  </body>
+</html>
