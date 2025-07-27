@@ -844,7 +844,7 @@ function loadCustomersData() {
 }
 
 /**
- * システム診断用関数
+ * システム診断用関数（強化版）
  */
 function diagnosticTest() {
   const properties = PropertiesService.getScriptProperties().getProperties();
@@ -856,21 +856,45 @@ function diagnosticTest() {
     
     const sheet = DataLib.getSheet('CUSTOMERS_SHEET_ID', 'Customers');
     console.log('Sheet access successful');
+    console.log('Sheet name:', sheet.getName());
+    console.log('Sheet URL:', sheet.getParent().getUrl());
     
     const data = DataLib.getAllData('CUSTOMERS_SHEET_ID', 'Customers');
-    console.log('Data rows:', data.length);
+    console.log('Raw data rows:', data.length);
+    console.log('Raw data content:', data);
+    
+    // ヘッダー行の確認
+    const headers = data.length > 0 ? data[0] : [];
+    console.log('Headers:', headers);
+    
+    // データ行の確認
+    const dataRows = data.slice(1);
+    console.log('Data rows (excluding header):', dataRows.length);
+    console.log('First data row:', dataRows.length > 0 ? dataRows[0] : 'No data');
+    
+    // CustomersAPI経由での取得テスト
+    const customersResult = CustomersAPI.getAllCustomers({ forceRefresh: true });
+    console.log('CustomersAPI result:', customersResult);
     
     return {
       success: true,
       properties: properties,
       sheetId: customersSheetId,
-      dataRows: data.length
+      sheetName: sheet.getName(),
+      sheetUrl: sheet.getParent().getUrl(),
+      rawDataRows: data.length,
+      headers: headers,
+      dataRowsCount: dataRows.length,
+      firstDataRow: dataRows.length > 0 ? dataRows[0] : null,
+      customersApiResult: customersResult,
+      rawData: data // 生データ全体を含める（デバッグ用）
     };
   } catch (error) {
     console.error('Diagnostic test error:', error);
     return {
       success: false,
       error: error.message,
+      stack: error.stack,
       properties: properties
     };
   }

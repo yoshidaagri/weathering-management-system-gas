@@ -204,7 +204,18 @@ const CustomersAPI = {
         
         // 全データ取得
         const rawData = DataLib.getAllData('CUSTOMERS_SHEET_ID', 'Customers');
-        customers = rawData.map(row => this.formatCustomerData(row));
+        console.log('CustomersAPI.getAllCustomers: Raw data length:', rawData.length);
+        console.log('CustomersAPI.getAllCustomers: Raw data:', rawData);
+        
+        // ヘッダー行を除外し、空の行もフィルタリング
+        const dataRows = rawData.slice(1); // ヘッダー行を除外
+        console.log('CustomersAPI.getAllCustomers: Data rows (excluding header):', dataRows.length);
+        
+        customers = dataRows
+          .filter(row => this.isValidCustomerRow(row))
+          .map(row => this.formatCustomerData(row));
+        
+        console.log('CustomersAPI.getAllCustomers: Valid customers after filtering:', customers.length);
         
         // キャッシュ更新
         this.cache.customers = customers;
@@ -719,6 +730,32 @@ const CustomersAPI = {
     return `CUST_${timestamp}_${random}`;
   },
   
+  /**
+   * 行データが有効な顧客データかチェックする
+   * @param {Array} row スプレッドシートの行データ
+   * @returns {boolean} 有効な行かどうか
+   */
+  isValidCustomerRow: function(row) {
+    // 行が存在しない、または空の場合は無効
+    if (!row || row.length === 0) {
+      return false;
+    }
+    
+    // すべてのセルが空（または空文字列）の場合は無効
+    const hasAnyData = row.some(cell => cell !== null && cell !== undefined && cell !== '');
+    if (!hasAnyData) {
+      return false;
+    }
+    
+    // 最低限、会社名かメールアドレスのどちらかが存在する必要がある
+    const companyName = row[1];
+    const email = row[3];
+    const hasMinimumData = (companyName && companyName.trim() !== '') || 
+                           (email && email.trim() !== '');
+    
+    return hasMinimumData;
+  },
+
   /**
    * 生データを顧客オブジェクトに整形する
    * @param {Array} row スプレッドシートの行データ
