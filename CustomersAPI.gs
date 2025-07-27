@@ -265,7 +265,17 @@ const CustomersAPI = {
       
     } catch (error) {
       this.logError('getAllCustomers', error, options);
-      throw error;
+      console.error('getAllCustomers error:', error);
+      
+      // エラーの場合は適切なレスポンスオブジェクトを返す
+      return {
+        success: false,
+        data: [],
+        stats: { total: 0, active: 0, inactive: 0 },
+        message: 'データの取得に失敗しました: ' + error.message,
+        error: error.message,
+        executionTime: new Date() - startTime
+      };
     }
   },
   
@@ -463,7 +473,16 @@ const CustomersAPI = {
       
     } catch (error) {
       this.logError('getCustomerStats', error, {});
-      throw error;
+      console.error('getCustomerStats error:', error);
+      
+      // エラーの場合は適切なレスポンスオブジェクトを返す
+      return {
+        success: false,
+        message: '統計情報の取得に失敗しました: ' + error.message,
+        data: { total: 0, active: 0, inactive: 0, byStatus: {}, byIndustry: {}, recentlyAdded: 0 },
+        error: error.message,
+        executionTime: new Date() - startTime
+      };
     }
   },
   

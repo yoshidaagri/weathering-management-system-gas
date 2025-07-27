@@ -101,6 +101,7 @@
             <a href="?page=admin-login" class="nav-btn">🔑 管理者ログインに戻る</a>
             <a href="?page=admin-dashboard" class="nav-btn">📊 管理者ダッシュボード</a>
             <a href="?" class="nav-btn">🏠 ホームページ</a>
+            <button onclick="runDiagnostic()" class="nav-btn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">🔍 システム診断</button>
         </div>
         
         <div class="info">
@@ -121,6 +122,25 @@
             console.log('Current URL:', window.location.href);
             console.log('Page parameter:', new URLSearchParams(window.location.search).get('page'));
         });
+        
+        // システム診断を実行
+        function runDiagnostic() {
+            console.log('Running diagnostic test...');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('Diagnostic result:', result);
+                    alert('診断結果（詳細はコンソールを確認）:\n' + 
+                          'Success: ' + result.success + '\n' +
+                          'Properties count: ' + Object.keys(result.properties || {}).length + '\n' +
+                          (result.error ? 'Error: ' + result.error : 'Sheet ID: ' + result.sheetId + '\nData rows: ' + result.dataRows));
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Diagnostic test failed:', error);
+                    alert('診断テストでエラーが発生しました: ' + error.message);
+                })
+                .diagnosticTest();
+        }
     </script>
 </body>
 </html>

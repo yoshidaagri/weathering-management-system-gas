@@ -299,27 +299,27 @@
                             <i class="fas fa-bolt"></i> クイックアクション
                         </h3>
                         
-                        <a href="#" class="action-btn" onclick="navigateToPage('customers')">
+                        <a href="<?= getAppUrl() ?>?page=customers" class="action-btn">
                             <i class="fas fa-users"></i> 顧客管理
                         </a>
                         
-                        <a href="#" class="action-btn" onclick="navigateToPage('projects')">
+                        <a href="<?= getAppUrl() ?>?page=projects" class="action-btn">
                             <i class="fas fa-project-diagram"></i> プロジェクト管理
                         </a>
                         
-                        <a href="#" class="action-btn" onclick="navigateToPage('measurements')">
+                        <a href="<?= getAppUrl() ?>?page=measurements" class="action-btn">
                             <i class="fas fa-flask"></i> 測定データ管理
                         </a>
                         
-                        <a href="#" class="action-btn" onclick="navigateToPage('analytics')">
+                        <a href="<?= getAppUrl() ?>?page=analytics" class="action-btn">
                             <i class="fas fa-chart-line"></i> 分析ダッシュボード
                         </a>
                         
-                        <a href="#" class="action-btn" onclick="openReports()">
+                        <a href="<?= getAppUrl() ?>?page=reports" class="action-btn">
                             <i class="fas fa-file-alt"></i> レポート生成
                         </a>
                         
-                        <a href="#" class="action-btn" onclick="openSystemSettings()">
+                        <a href="<?= getAppUrl() ?>?page=settings" class="action-btn">
                             <i class="fas fa-cogs"></i> システム設定
                         </a>
                     </div>
@@ -602,22 +602,8 @@
             }
         }
         
-        // クイックアクション関数群
-        function navigateToPage(page) {
-            // 現在のベースURLを取得
-            const baseUrl = window.location.origin + window.location.pathname;
-            const newUrl = baseUrl + '?page=' + page;
-            console.log('Navigating to:', newUrl);
-            window.location.href = newUrl;
-        }
-        
-        function openCustomerManagement() {
-            navigateToPage('customers');
-        }
-        
-        function openProjectManagement() {
-            navigateToPage('projects');
-        }
+        // 不要なJavaScript関数は削除済み
+        // 全ての遷移はシンプルリンク（<?= getAppUrl() ?>?page=xxx）を使用
         
         // ページ初期化時に測定データ統計を読み込み
         document.addEventListener('DOMContentLoaded', function() {

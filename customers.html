@@ -668,12 +668,22 @@
             
             google.script.run
                 .withSuccessHandler(function(result) {
+                    console.log('loadCustomers: received result:', result);
+                    
+                    // null/undefined チェック
+                    if (!result) {
+                        console.error('loadCustomers: result is null or undefined');
+                        showAlert('エラー', 'サーバーからの応答がありません', 'error');
+                        showLoading(false);
+                        return;
+                    }
+                    
                     if (result.success) {
-                        allCustomers = result.data;
-                        updateStats(result.stats);
+                        allCustomers = result.data || [];
+                        updateStats(result.stats || { total: 0, active: 0, inactive: 0 });
                         filterCustomers();
                     } else {
-                        showAlert('エラー', result.message, 'error');
+                        showAlert('エラー', result.message || '不明なエラーが発生しました', 'error');
                     }
                     showLoading(false);
                 })

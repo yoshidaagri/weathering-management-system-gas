@@ -31,7 +31,7 @@ function doGet(e) {
     'analysis-simple': 'analysis-simple', // Phase 3 新機能
     
     // Phase 2 既存ページ（統合後も利用可能）
-    'customers': 'customers-simple',
+    'customers': 'customers',
     'projects': 'projects',
     'measurements': 'measurements',
     'analytics': 'analytics',
@@ -239,157 +239,56 @@ function renderCustomerLoginPage() {
  * @returns {HtmlOutput} HTML出力
  */
 function renderAdminDashboard() {
-  console.log('renderAdminDashboard: Starting - Simple version');
-  
-  // シンプルな直接HTML出力
-  return HtmlService.createHtmlOutput(`
-    <!DOCTYPE html>
-    <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CO2除去管理システム - 管理者ダッシュボード</title>
-        
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background: #f8f9fa;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-                color: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                text-align: center;
-            }
-            
-            .dashboard-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .dashboard-card {
-                background: white;
-                padding: 25px;
-                border-radius: 10px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            }
-            
-            .quick-actions {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            }
-            
-            .btn {
-                display: inline-block;
-                padding: 12px 24px;
-                margin: 10px;
-                background: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            
-            .btn:hover {
-                background: #0056b3;
-                color: white;
-                text-decoration: none;
-            }
-            
-            .btn-success {
-                background: #28a745;
-            }
-            
-            .btn-success:hover {
-                background: #1e7e34;
-            }
-            
-            .success-message {
-                background: #d4edda;
-                color: #155724;
-                padding: 15px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-                border: 1px solid #c3e6cb;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>🏢 管理者ダッシュボード</h1>
-            <p>風化促進CO2除去管理システム</p>
-        </div>
-        
-        <div class="success-message">
-            ✅ <strong>認証成功！</strong> 管理者ダッシュボードに正常にアクセスしました。
-        </div>
-        
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <h3>📊 統計情報</h3>
-                <p>総顧客数: 5</p>
-                <p>アクティブプロジェクト: 12</p>
-                <p>今日の測定データ: 34</p>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3>🚨 アラート</h3>
-                <p>システム正常稼働中</p>
-                <p>データベース接続: 正常</p>
-                <p>最新バックアップ: 今日</p>
-            </div>
-        </div>
-        
-        <div class="quick-actions">
-            <h3>クイックアクション</h3>
-            
-            <a href="?page=customers" class="btn btn-success">
-                🏢 顧客管理
-            </a>
-            
-            <a href="?page=projects" class="btn">
-                📋 プロジェクト管理
-            </a>
-            
-            <a href="?page=measurements" class="btn">
-                🧪 測定データ
-            </a>
-            
-            <a href="?page=analytics" class="btn">
-                📈 分析・レポート
-            </a>
-            
-            <a href="?page=test" class="btn" style="background: #17a2b8;">
-                🧪 テストページ
-            </a>
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center; color: #6c757d;">
-            <p>現在時刻: <span id="timestamp"></span></p>
-            <p>URL確認: <span id="currentUrl"></span></p>
-        </div>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('timestamp').textContent = new Date().toLocaleString();
-                document.getElementById('currentUrl').textContent = window.location.href;
-                console.log('管理者ダッシュボードが正常に読み込まれました');
-                console.log('URL:', window.location.href);
-            });
-        </script>
-    </body>
-    </html>
-  `).setTitle('管理者ダッシュボード').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  try {
+    console.log('renderAdminDashboard: Starting...');
+    
+    // 認証チェック（シンプル版）
+    const user = Session.getActiveUser();
+    if (!user || !user.getEmail()) {
+      console.log('Authentication failed: No active user');
+      return createErrorPage('アクセス拒否', '管理者権限が必要です。');
+    }
+    
+    console.log('renderAdminDashboard: User authenticated:', user.getEmail());
+    
+    // 統計データを取得（エラー耐性あり）
+    let stats;
+    try {
+      stats = getAdminDashboardStats();
+      console.log('Dashboard stats loaded:', stats);
+    } catch (error) {
+      console.warn('Failed to get dashboard stats:', error);
+      stats = {
+        totalCustomers: 0,
+        totalProjects: 0,
+        systemStatus: 'データ取得エラー',
+        lastUpdated: new Date()
+      };
+    }
+    
+    // HTMLテンプレートを読み込み
+    const template = HtmlService.createTemplateFromFile('admin-dashboard');
+    
+    // テンプレート変数設定
+    template.appName = Config.getAppName();
+    template.user = {
+      email: user.getEmail(),
+      name: user.getEmail().split('@')[0],
+      type: 'admin'
+    };
+    template.stats = stats;
+    
+    const output = template.evaluate()
+      .setTitle(Config.getAppName() + ' - 管理者ダッシュボード')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    
+    console.log('Dashboard rendered successfully');
+    return output;
+    
+  } catch (error) {
+    console.error('renderAdminDashboard error:', error);
+    return createErrorPage('ページ読み込みエラー', '管理者ダッシュボードの読み込みに失敗しました: ' + error.message);
+  }
 }
 
 /**
@@ -751,95 +650,83 @@ function include(filename) {
  * @returns {HtmlOutput} HTML出力
  */
 function renderCustomersPage() {
-  console.log('renderCustomersPage: Starting - Direct HTML output');
-  
-  // 最もシンプルな直接HTML出力
-  return HtmlService.createHtmlOutput(`
-    <!DOCTYPE html>
-    <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CO2除去管理システム - 顧客管理</title>
-        
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background: #f5f5f5;
-            }
-            
-            .header {
-                background: #007bff;
-                color: white;
-                padding: 20px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-            }
-            
-            .content {
-                background: white;
-                padding: 30px;
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }
-            
-            .success-message {
-                background: #d4edda;
-                color: #155724;
-                padding: 15px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-                border: 1px solid #c3e6cb;
-            }
-            
-            .nav-links a {
-                color: #007bff;
-                text-decoration: none;
-                margin-right: 20px;
-                padding: 8px 16px;
-                border: 1px solid #007bff;
-                border-radius: 3px;
-                display: inline-block;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>🏢 顧客管理</h1>
-            <p>ユーザー: admin@example.com | アプリ: CO2除去管理システム</p>
-        </div>
-        
-        <div class="content">
-            <div class="success-message">
-                ✅ <strong>遷移成功！</strong> 管理者ダッシュボードから顧客管理ページに正常に遷移しました。
-            </div>
-            
-            <h2>顧客管理機能</h2>
-            <p>このページでは顧客の登録・編集・削除などの管理を行います。</p>
-            
-            <div class="nav-links">
-                <a href="?page=admin-dashboard">📊 ダッシュボード</a>
-                <a href="?page=projects">📋 プロジェクト管理</a>
-                <a href="?page=test">🧪 テストページ</a>
-            </div>
-            
-            <h3>テスト情報</h3>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                <strong>現在時刻:</strong> <span id="timestamp"></span><br>
-                <strong>遷移テスト:</strong> 成功
-            </div>
-        </div>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('timestamp').textContent = new Date().toLocaleString();
-                console.log('顧客管理ページが正常に読み込まれました - 直接HTML版');
-            });
-        </script>
-    </body>
-    </html>
-  `).setTitle('顧客管理').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  try {
+    console.log('renderCustomersPage: Starting...');
+    
+    // 認証チェック（シンプル版）
+    const user = Session.getActiveUser();
+    if (!user || !user.getEmail()) {
+      return createErrorPage('アクセス権限エラー', '管理者としてログインしてください。');
+    }
+    
+    console.log('renderCustomersPage: User authenticated:', user.getEmail());
+    
+    const template = HtmlService.createTemplateFromFile('customers');
+    template.appName = Config.getAppName();
+    template.user = {
+      email: user.getEmail(),
+      name: user.getEmail().split('@')[0],
+      type: 'admin'
+    };
+    
+    // 顧客統計を取得（エラー耐性あり）
+    try {
+      const stats = getCustomersStats();
+      template.stats = stats;
+    } catch (error) {
+      console.warn('Failed to get customer stats:', error);
+      template.stats = {
+        total: 0,
+        active: 0,
+        inactive: 0
+      };
+    }
+    
+    console.log('renderCustomersPage: Template prepared successfully');
+    
+    return template.evaluate()
+      .setTitle(Config.getAppName() + ' - 顧客管理')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      
+  } catch (error) {
+    console.error('renderCustomersPage error:', error);
+    return createErrorPage('ページエラー', '顧客管理ページの読み込みでエラーが発生しました: ' + error.message);
+  }
+}
+
+/**
+ * 顧客統計を取得
+ * @returns {Object} 顧客統計データ
+ */
+function getCustomersStats() {
+  try {
+    if (typeof CustomersAPI !== 'undefined') {
+      const result = CustomersAPI.getAllCustomers();
+      if (result.success) {
+        const customers = result.data;
+        const activeCustomers = customers.filter(c => c.isActive).length;
+        return {
+          total: customers.length,
+          active: activeCustomers,
+          inactive: customers.length - activeCustomers
+        };
+      }
+    }
+    
+    // フォールバック統計
+    return {
+      total: 0,
+      active: 0,
+      inactive: 0
+    };
+  } catch (error) {
+    console.error('getCustomersStats error:', error);
+    return {
+      total: 0,
+      active: 0,
+      inactive: 0
+    };
+  }
 }
 
 /**
@@ -903,23 +790,78 @@ function getProjectsStats() {
  */
 function loadCustomersData() {
   try {
-    const customersResult = CustomersAPI.getAllCustomers();
-    const statsResult = CustomersAPI.getCustomerStats();
+    console.log('loadCustomersData: Starting...');
     
-    return {
+    // CustomersAPIの存在確認
+    if (typeof CustomersAPI === 'undefined') {
+      console.error('loadCustomersData: CustomersAPI is undefined');
+      return {
+        success: false,
+        data: [],
+        stats: { total: 0, active: 0, inactive: 0 },
+        message: 'CustomersAPIが利用できません'
+      };
+    }
+    
+    console.log('loadCustomersData: Calling CustomersAPI.getAllCustomers...');
+    const customersResult = CustomersAPI.getAllCustomers();
+    console.log('loadCustomersData: CustomersAPI.getAllCustomers result:', customersResult);
+    
+    console.log('loadCustomersData: Calling CustomersAPI.getCustomerStats...');
+    const statsResult = CustomersAPI.getCustomerStats();
+    console.log('loadCustomersData: CustomersAPI.getCustomerStats result:', statsResult);
+    
+    const result = {
       success: true,
       data: customersResult.success ? customersResult.data : [],
-      stats: statsResult.success ? statsResult.data : {},
+      stats: statsResult.success ? statsResult.data : { total: 0, active: 0, inactive: 0 },
       message: '顧客データを読み込みました'
     };
     
+    console.log('loadCustomersData: Final result:', result);
+    return result;
+    
   } catch (error) {
     console.error('loadCustomersData error:', error);
+    console.error('loadCustomersData error stack:', error.stack);
     return {
       success: false,
       data: [],
-      stats: {},
+      stats: { total: 0, active: 0, inactive: 0 },
       message: 'データの読み込みに失敗しました: ' + error.message
+    };
+  }
+}
+
+/**
+ * システム診断用関数
+ */
+function diagnosticTest() {
+  const properties = PropertiesService.getScriptProperties().getProperties();
+  console.log('All Script Properties:', properties);
+  
+  try {
+    const customersSheetId = Config.getSheetId('CUSTOMERS_SHEET_ID');
+    console.log('Customers Sheet ID:', customersSheetId);
+    
+    const sheet = DataLib.getSheet('CUSTOMERS_SHEET_ID', 'Customers');
+    console.log('Sheet access successful');
+    
+    const data = DataLib.getAllData('CUSTOMERS_SHEET_ID', 'Customers');
+    console.log('Data rows:', data.length);
+    
+    return {
+      success: true,
+      properties: properties,
+      sheetId: customersSheetId,
+      dataRows: data.length
+    };
+  } catch (error) {
+    console.error('Diagnostic test error:', error);
+    return {
+      success: false,
+      error: error.message,
+      properties: properties
     };
   }
 }
