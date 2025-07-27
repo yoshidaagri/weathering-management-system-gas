@@ -665,10 +665,23 @@
         // 顧客データを読み込む
         function loadCustomers() {
             showLoading(true);
+            console.log('loadCustomers: Starting request...');
+            
+            // タイムアウト設定（30秒）
+            const timeoutId = setTimeout(function() {
+                console.error('loadCustomers: Request timed out');
+                showAlert('エラー', 'サーバーとの通信がタイムアウトしました。再試行してください。', 'error');
+                showLoading(false);
+            }, 30000);
             
             google.script.run
                 .withSuccessHandler(function(result) {
                     console.log('loadCustomers: received result:', result);
+                    console.log('loadCustomers: result type:', typeof result);
+                    console.log('loadCustomers: result keys:', result ? Object.keys(result) : 'null/undefined');
+                    
+                    // タイムアウトをクリア
+                    clearTimeout(timeoutId);
                     
                     // null/undefined チェック
                     if (!result) {
@@ -678,17 +691,30 @@
                         return;
                     }
                     
+                    // success プロパティの存在確認
+                    if (typeof result.success === 'undefined') {
+                        console.error('loadCustomers: result.success is undefined, result:', result);
+                        showAlert('エラー', 'サーバー応答の形式が不正です', 'error');
+                        showLoading(false);
+                        return;
+                    }
+                    
                     if (result.success) {
+                        console.log('loadCustomers: Success, processing data...');
                         allCustomers = result.data || [];
                         updateStats(result.stats || { total: 0, active: 0, inactive: 0 });
                         filterCustomers();
+                        console.log('loadCustomers: Data processed successfully');
                     } else {
+                        console.error('loadCustomers: Server returned success=false:', result.message);
                         showAlert('エラー', result.message || '不明なエラーが発生しました', 'error');
                     }
                     showLoading(false);
                 })
                 .withFailureHandler(function(error) {
-                    showAlert('エラー', '顧客データの読み込みに失敗しました: ' + error.message, 'error');
+                    console.error('loadCustomers: Failure handler called:', error);
+                    clearTimeout(timeoutId);
+                    showAlert('エラー', '顧客データの読み込みに失敗しました: ' + (error.message || error), 'error');
                     showLoading(false);
                 })
                 .loadCustomersData();

@@ -811,14 +811,23 @@ function loadCustomersData() {
     const statsResult = CustomersAPI.getCustomerStats();
     console.log('loadCustomersData: CustomersAPI.getCustomerStats result:', statsResult);
     
+    // Dateオブジェクトを文字列に変換（GAS制約対応）
+    const processedData = customersResult.success ? 
+      customersResult.data.map(customer => ({
+        ...customer,
+        createdAt: customer.createdAt ? customer.createdAt.toISOString() : null,
+        updatedAt: customer.updatedAt ? customer.updatedAt.toISOString() : null,
+        contractDate: customer.contractDate ? customer.contractDate.toISOString() : null
+      })) : [];
+    
     const result = {
       success: true,
-      data: customersResult.success ? customersResult.data : [],
+      data: processedData,
       stats: statsResult.success ? statsResult.data : { total: 0, active: 0, inactive: 0 },
       message: '顧客データを読み込みました'
     };
     
-    console.log('loadCustomersData: Final result:', result);
+    console.log('loadCustomersData: Final result (dates converted):', result);
     return result;
     
   } catch (error) {
@@ -828,7 +837,8 @@ function loadCustomersData() {
       success: false,
       data: [],
       stats: { total: 0, active: 0, inactive: 0 },
-      message: 'データの読み込みに失敗しました: ' + error.message
+      message: 'データの読み込みに失敗しました: ' + error.message,
+      error: error.message
     };
   }
 }
