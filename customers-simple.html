@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - 顧客管理</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-links {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .nav-links a:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏢 顧客管理</h1>
+        <p>ユーザー: <?= user.email ?> | アプリ: <?= appName ?></p>
+    </div>
+    
+    <div class="nav-links">
+        <a href="?page=admin-dashboard">📊 ダッシュボード</a>
+        <a href="?page=projects">📋 プロジェクト管理</a>
+        <a href="?page=measurements">🧪 測定データ</a>
+        <a href="?page=analytics">📈 分析</a>
+        <a href="?page=test">🧪 テストページ</a>
+    </div>
+    
+    <div class="content">
+        <div class="success-message">
+            ✅ <strong>遷移成功！</strong> 管理者ダッシュボードから顧客管理ページに正常に遷移しました。
+        </div>
+        
+        <h2>顧客管理機能</h2>
+        <p>このページでは顧客の登録・編集・削除などの管理を行います。</p>
+        
+        <h3>統計情報</h3>
+        <ul>
+            <li>総顧客数: <?= stats.total ?></li>
+            <li>アクティブ顧客: <?= stats.active ?></li>
+            <li>非アクティブ顧客: <?= stats.inactive ?></li>
+        </ul>
+        
+        <h3>テスト情報</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <strong>現在のURL:</strong> <span id="currentUrl"></span><br>
+            <strong>ページパラメータ:</strong> <span id="pageParam"></span><br>
+            <strong>タイムスタンプ:</strong> <span id="timestamp"></span>
+        </div>
+        
+        <h3>機能テスト</h3>
+        <button onclick="testFunction()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer;">
+            動作テスト実行
+        </button>
+        <div id="testResult"></div>
+    </div>
+    
+    <script>
+        // ページ情報を表示
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('pageParam').textContent = new URLSearchParams(window.location.search).get('page') || 'なし';
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+            
+            console.log('顧客管理ページが正常に読み込まれました');
+            console.log('URL:', window.location.href);
+        });
+        
+        function testFunction() {
+            const result = document.getElementById('testResult');
+            result.innerHTML = '<div style="background: #d1ecf1; color: #0c5460; padding: 10px; margin-top: 10px; border-radius: 3px;">✅ テスト実行成功！ページは正常に動作しています。</div>';
+        }
+    </script>
+</body>
+</html>

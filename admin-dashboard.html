@@ -299,19 +299,19 @@
                             <i class="fas fa-bolt"></i> クイックアクション
                         </h3>
                         
-                        <a href="?page=customers" class="action-btn">
+                        <a href="#" class="action-btn" onclick="navigateToPage('customers')">
                             <i class="fas fa-users"></i> 顧客管理
                         </a>
                         
-                        <a href="?page=projects" class="action-btn">
+                        <a href="#" class="action-btn" onclick="navigateToPage('projects')">
                             <i class="fas fa-project-diagram"></i> プロジェクト管理
                         </a>
                         
-                        <a href="?page=measurements" class="action-btn">
+                        <a href="#" class="action-btn" onclick="navigateToPage('measurements')">
                             <i class="fas fa-flask"></i> 測定データ管理
                         </a>
                         
-                        <a href="?page=analytics" class="action-btn">
+                        <a href="#" class="action-btn" onclick="navigateToPage('analytics')">
                             <i class="fas fa-chart-line"></i> 分析ダッシュボード
                         </a>
                         
@@ -603,12 +603,20 @@
         }
         
         // クイックアクション関数群
+        function navigateToPage(page) {
+            // 現在のベースURLを取得
+            const baseUrl = window.location.origin + window.location.pathname;
+            const newUrl = baseUrl + '?page=' + page;
+            console.log('Navigating to:', newUrl);
+            window.location.href = newUrl;
+        }
+        
         function openCustomerManagement() {
-            window.location.href = '?page=customers';
+            navigateToPage('customers');
         }
         
         function openProjectManagement() {
-            window.location.href = '?page=projects';
+            navigateToPage('projects');
         }
         
         // ページ初期化時に測定データ統計を読み込み
@@ -1002,7 +1010,7 @@
                 .withFailureHandler(function(error) {
                     console.error('Stats update failed:', error);
                 })
-                .getAdminDashboardStats();
+                .getAdminDashboardStatsForUpdate();
             
             // 測定データ統計も更新
             loadMeasurementStats();

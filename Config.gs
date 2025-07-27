@@ -20,6 +20,9 @@ const Config = {
    * @throws {Error} IDが設定されていない場合
    */
   getSheetId: function(type) {
+    // Script Propertiesから直接取得する場合とマッピングから取得する場合の両方に対応
+    let propertyName;
+    
     const propertyMap = {
       'adminUsers': 'ADMIN_USERS_SHEET_ID',
       'customerUsers': 'CUSTOMER_USERS_SHEET_ID',
@@ -30,9 +33,15 @@ const Config = {
       'qualityReport': 'QUALITY_REPORT_SHEET_ID'
     };
 
-    const propertyName = propertyMap[type];
-    if (!propertyName) {
-      throw new Error(`未対応のスプレッドシートタイプ: ${type}`);
+    // typeが既にScript Propertiesの名前の場合はそのまま使用
+    if (type.endsWith('_SHEET_ID')) {
+      propertyName = type;
+    } else {
+      // マッピングから取得
+      propertyName = propertyMap[type];
+      if (!propertyName) {
+        throw new Error(`未対応のスプレッドシートタイプ: ${type}`);
+      }
     }
 
     const sheetId = PropertiesService.getScriptProperties().getProperty(propertyName);
@@ -90,6 +99,14 @@ const Config = {
     TIMEZONE: 'Asia/Tokyo',
     DATE_FORMAT: 'YYYY/MM/DD',
     DATETIME_FORMAT: 'YYYY/MM/DD HH:mm:ss'
+  },
+
+  /**
+   * アプリケーション名を取得
+   * @returns {string} アプリケーション名
+   */
+  getAppName: function() {
+    return this.APP.NAME;
   },
 
   /**

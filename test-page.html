@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - テストページ</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .test-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+        
+        .navigation-links {
+            margin-top: 30px;
+        }
+        
+        .nav-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .current-url {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #ffeb3b;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="success-icon">🎉</div>
+        <h1>ページ遷移テスト成功！</h1>
+        
+        <div class="info">
+            <strong>テストページに正常に遷移しました</strong><br>
+            GAS Web Appのルーティングは正常に動作しています
+        </div>
+        
+        <div class="current-url">
+            現在のURL: <span id="currentUrl"></span>
+        </div>
+        
+        <div class="navigation-links">
+            <a href="?page=admin-login" class="nav-btn">🔑 管理者ログインに戻る</a>
+            <a href="?page=admin-dashboard" class="nav-btn">📊 管理者ダッシュボード</a>
+            <a href="?" class="nav-btn">🏠 ホームページ</a>
+        </div>
+        
+        <div class="info">
+            <strong>遷移テスト方法：</strong><br>
+            1. 各ボタンをクリックして遷移確認<br>
+            2. ブラウザの戻るボタンで戻る<br>
+            3. URLが正しく変更されるか確認
+        </div>
+    </div>
+    
+    <script>
+        // 現在のURLを表示
+        document.getElementById('currentUrl').textContent = window.location.href;
+        
+        // ページ読み込み完了時にコンソールログ
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded successfully!');
+            console.log('Current URL:', window.location.href);
+            console.log('Page parameter:', new URLSearchParams(window.location.search).get('page'));
+        });
+    </script>
+</body>
+</html>
